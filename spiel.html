@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Rad des Schicksals</title>
+
     <style>
         :root {
             --bg: #000;
@@ -378,6 +379,9 @@
     <!-- Overlay für erledigte Aufgaben-->
     <div id="doneOverlay" class="hidden">
         <div id="doneOverlayContent">
+            <h2>Score</h2>
+            <div id="scoreboard"></div>
+
             <h2>Erledigte Aufgaben</h2>
             <div id="doneOverlayList"></div>
             <button id="closeOverlayBtn">Schließen</button>
@@ -399,7 +403,7 @@
         <button id="actionBtn">Rad drehen</button>
         <button id="murdererCodeBtn" class="hidden">Mörder-Code eingeben</button>
     </div>
-    <div id="doneList"></div>
+    <!-- <div id="doneList"></div> -->
 
 
     <script>
@@ -572,6 +576,8 @@
             if (window.currentPlayer.currentTask) {
                 addCompleted(window.currentPlayer.currentTask);
                 window.currentPlayer.score++;
+                window.currentPlayer.score++;
+                saveScore(window.currentPlayer); // <-- HIER NEU
                 saveLocal('completed_' + window.currentPlayer.name, window.currentPlayer.completed);
                 window.currentPlayer.currentTask = null;
                 renderDoneList();
@@ -692,6 +698,60 @@
         function saveLocal(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
         function loadLocal(k, d) { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }
     </script>
+
+    <script type="module">
+        // Firebase SDKs laden
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot }
+            from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        // Deine Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbk0sueA9MKv2ZwBoh9zb9muu8MelFq3g",
+            authDomain: "crime-club-game.firebaseapp.com",
+            projectId: "crime-club-game",
+            storageBucket: "crime-club-game.firebasestorage.app",
+            messagingSenderId: "808280379487",
+            appId: "1:808280379487:web:9107d2b3159d7b86dc4bea",
+            measurementId: "G-TYDNHNYK27"
+        };
+
+        // Firebase initialisieren
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- SCORE SPEICHERN ---
+        async function saveScore(player) {
+            const ref = doc(db, "scores", player.name);
+            await setDoc(ref, {
+                name: player.name,
+                score: player.score
+            }, { merge: true });
+        }
+
+        // --- SCOREBOARD ANZEIGEN ---
+        function renderScoreboard(scores) {
+            const sb = document.getElementById("scoreboard");
+            sb.innerHTML = "<h3>Scoreboard</h3>";
+            scores.sort((a, b) => b.score - a.score);
+            scores.forEach(s => {
+                sb.innerHTML += `<div>${s.name}: ${s.score}</div>`;
+            });
+        }
+
+        // Live-Listener für Firestore
+        const q = collection(db, "scores");
+        onSnapshot(q, (snapshot) => {
+            const arr = [];
+            snapshot.forEach(doc => arr.push(doc.data()));
+            renderScoreboard(arr);
+        });
+
+        // Global verfügbar machen
+        window.saveScore = saveScore;
+    </script>
+
+
 </body>
 
 </html>

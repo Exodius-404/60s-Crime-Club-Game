@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Test Scoreboard</title>
+</head>
+<body>
+<h1>Test Scoreboard</h1>
+
+<!-- Scoreboard-Anzeige -->
+<div id="scoreboard"></div>
+
+<!-- Button zum Punkte hinzufügen -->
+<input type="text" id="nameInput" placeholder="Name">
+<button id="addPointBtn">+1 Punkt</button>
+
+<script type="module">
+  // Firebase SDK laden
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbk0sueA9MKv2ZwBoh9zb9muu8MelFq3g",
+    authDomain: "crime-club-game.firebaseapp.com",
+    projectId: "crime-club-game",
+    storageBucket: "crime-club-game.firebasestorage.app",
+    messagingSenderId: "808280379487",
+    appId: "1:808280379487:web:9107d2b3159d7b86dc4bea",
+    measurementId: "G-TYDNHNYK27"
+  };
+
+  // Firebase initialisieren
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Score speichern
+  async function saveScore(name, score) {
+    const ref = doc(db, "scores", name);
+    await setDoc(ref, { name, score }, { merge: true });
+  }
+
+  // Live Scoreboard rendern
+  function renderScoreboard(scores) {
+    const sb = document.getElementById("scoreboard");
+    sb.innerHTML = "<h3>Scoreboard</h3>";
+    scores.sort((a,b) => b.score - a.score);
+    scores.forEach(s => sb.innerHTML += `<div>${s.name}: ${s.score}</div>`);
+  }
+
+  // Live Listener
+  const q = collection(db, "scores");
+  onSnapshot(q, snapshot => {
+    const arr = [];
+    snapshot.forEach(doc => arr.push(doc.data()));
+    renderScoreboard(arr);
+  });
+
+  // Punkte hinzufügen Button
+  document.getElementById("addPointBtn").addEventListener("click", async () => {
+    const name = document.getElementById("nameInput").value.trim();
+    if(!name) return alert("Bitte Namen eingeben!");
+    // Aktuellen Score aus Firestore holen (optional, sonst einfach +1)
+    await saveScore(name, (Math.floor(Math.random()*100)+1)); // Test: zufälliger Score
+  });
+</script>
+</body>
+</html>
