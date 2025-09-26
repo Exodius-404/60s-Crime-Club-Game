@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Rad des Schicksals</title>
+    <style>
+        :root {
+            --bg: #000;
+            --accent: #fff;
+            --accent-2: #ffd966;
+            --muted: #777;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--accent);
+            font-family: Inter, system-ui, sans-serif;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #doneList {
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border: 1px solid var(--muted);
+            border-radius: 0.5em;
+            padding: 0.5em;
+            margin-top: 2vh;
+            text-align: left;
+            background: #111;
+            width: 60vw;
+            max-width: 300px;
+        }
+
+        /* Schöner Scrollbar für moderne Browser */
+        #doneList::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #doneList::-webkit-scrollbar-thumb {
+            background-color: var(--accent-2);
+            border-radius: 4px;
+        }
+
+
+
+        h1 {
+            font-size: clamp(16px, 2vw, 20px);
+            margin-bottom: 1vh;
+        }
+
+        input,
+        button {
+            font-family: inherit;
+            font-size: clamp(14px, 2vw, 18px);
+        }
+
+        /* Perfektes Input CSS für Flying Name */
+        input#nameInput {
+            padding: 10px;
+            border: none;
+            border-bottom: 1px solid var(--muted);
+            background: transparent;
+            color: var(--accent);
+            font-family: Inter, system-ui, sans-serif;
+            font-size: clamp(15px, 3vw, 24px);
+            font-weight: 700;
+            line-height: 1;
+            text-transform: capitalize;
+            width: 60vw;
+            max-width: 300px;
+            text-align: left;
+        }
+
+        button {
+            background: var(--accent-2);
+            color: #111;
+            border: none;
+            padding: 0.7em 1.2em;
+            border-radius: 0.5em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.5s;
+            font-size: clamp(14px, 1.5vw, 16px);
+        }
+
+        #startArea {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1vh;
+        }
+
+        .dots {
+            display: inline-block;
+            width: 1.5em;
+            text-align: left;
+            overflow: hidden;
+            vertical-align: bottom;
+            animation: dotsAnim 1s steps(4, end) infinite;
+            opacity: 0;
+        }
+
+        #duBistSpan {
+            display: inline-block;
+            position: relative;
+        }
+
+        #dotsSpan {
+            display: inline-block;
+            position: absolute;
+            left: 100%;
+            /* rechts neben "DU BIST" */
+            top: 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        #dotsSpan::after {
+            content: "...";
+            display: inline-block;
+            animation: dotsAnim 1s steps(4, end) infinite;
+        }
+
+        @keyframes dotsAnim {
+            0% {
+                content: "";
+            }
+
+            25% {
+                content: ".";
+            }
+
+            50% {
+                content: "..";
+            }
+
+            75% {
+                content: "...";
+            }
+
+            100% {
+                content: "";
+            }
+        }
+
+
+        #duBistSpan,
+        #dotsSpan,
+        #roleSpan {
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        #roleSpan {
+            display: block;
+            /* auf eigene Zeile */
+            margin-top: 1vh;
+            font-size: 1.2em;
+        }
+
+        .role {
+            font-weight: 700;
+            font-size: clamp(15px, 3vw, 24px);
+            opacity: 0;
+            transition: opacity 1s linear;
+            text-align: center;
+            white-space: normal;
+            /* erlaubt Zeilenumbruch */
+            max-width: 80vw;
+            word-wrap: break-word;
+            margin-top: 2vh;
+            position: relative;
+            /* nicht fixed! */
+            transform: none;
+            /* kein translate(-50%, -50%) */
+        }
+
+        .wheelArea {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5vh;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease, transform 1.5s ease;
+            width: 90vw;
+            max-width: 320px;
+            position: fixed;
+            /* bleibt fixiert */
+            bottom: -50%;
+            /* startet unterhalb des Bildschirms */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wheelArea.show {
+            opacity: 1;
+            bottom: 10%;
+            /* Endposition etwas über dem unteren Rand */
+        }
+
+        #currentTask {
+            font-size: clamp(14px, 2vw, 16px);
+            color: var(--accent-2);
+            text-align: center;
+            max-width: 100%;
+            word-wrap: break-word;
+            margin-bottom: 1vh;
+        }
+
+        #startArea button {
+            min-width: 55px;
+            margin-top: 0.5vh;
+            /* kleine Lücke zwischen Buttons */
+        }
+
+        #startArea,
+        .role,
+        .wheelArea {
+            position: fixed;
+        }
+
+        .wheel {
+            width: 70vw;
+            /* kleiner auf kleinen Displays */
+            max-width: 250px;
+            height: 70vw;
+            max-height: 250px;
+            border-radius: 50%;
+            background: #111;
+            aspect-ratio: 1 / 1;
+            transform-origin: center center;
+        }
+
+        #wheelArea button {
+            width: 70%;
+            /* passen beide Buttons nebeneinander */
+            min-width: 100px;
+            /* für sehr kleine Displays */
+        }
+
+
+        @media (max-width: 400px) {
+            .wheel {
+                width: 50vw;
+                height: 50vw;
+            }
+
+            #wheelArea {
+                flex-direction: column;
+                gap: 1vh;
+            }
+
+            #wheelArea button {
+                width: 70%;
+                /* Buttons stapeln sich untereinander */
+                margin-top: 0.5em;
+            }
+        }
+
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 1em solid transparent;
+            border-right: 1em solid transparent;
+            border-bottom: 1.6em solid var(--accent-2);
+            margin: 0 auto;
+        }
+
+        .taskText {
+            min-height: 3em;
+            font-size: clamp(14px, 2vw, 16px);
+            margin-bottom: 1vh;
+            /* Abstand zum Pfeil */
+            color: var(--accent-2);
+            text-align: center;
+            max-width: 80vw;
+            word-wrap: break-word;
+        }
+
+        .item {
+            padding: 0.5em 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: clamp(12px, 1.5vw, 14px);
+            text-align: left;
+        }
+
+        /* Overlay Styling */
+        #doneOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #doneOverlayContent {
+            background: #111;
+            padding: 2em;
+            border-radius: 10px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        #doneOverlayList {
+            margin-top: 1em;
+            text-align: left;
+        }
+
+        #doneOverlayList .item {
+            padding: 0.5em 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #closeOverlayBtn {
+            margin-top: 1em;
+        }
+
+        #hamburgerBtn {
+            position: fixed;
+            bottom: 0.1em;
+            left: 0.1em;
+            width: 2.5em;
+            height: 2.5em;
+            font-size: 2em;
+            /* Emoji-Größe */
+            background: var(--accent-1);
+            /* gelb */
+            color: #111;
+            /* Emoji-Farbe bleibt dunkel */
+            border: none;
+            border-radius: 0.5em;
+            /* runde Ecken */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Emoji zentrieren */
+            cursor: pointer;
+            z-index: 999;
+            padding: 0;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- <h1>Film Noir - 60s Crime Club Party</h1> -->
+
+    <!-- Overlay für erledigte Aufgaben-->
+    <div id="doneOverlay" class="hidden">
+        <div id="doneOverlayContent">
+            <h2>Erledigte Aufgaben</h2>
+            <div id="doneOverlayList"></div>
+            <button id="closeOverlayBtn">Schließen</button>
+        </div>
+    </div>
+
+    <button id="hamburgerBtn" class="hidden">🎲</button>
+
+    <div id="startArea">
+        <input id="nameInput" type="text" placeholder="Dein Name">
+        <button id="startBtn">Los</button>
+    </div>
+
+    <div id="roleArea" class="role"></div>
+    <div id="wheelArea" class="wheelArea">
+        <div id="currentTask" class="taskText hidden"></div> <!-- Tasktext über dem Pfeil -->
+        <div class="pointer"></div>
+        <div id="wheel" class="wheel"></div>
+        <button id="actionBtn">Rad drehen</button>
+        <button id="murdererCodeBtn" class="hidden">Mörder-Code eingeben</button>
+    </div>
+    <div id="doneList"></div>
+
+
+    <script>
+        const CONFIG = { murdererProb: 0.12, detectiveProb: 0.1, murderCode: "t0t" };
+        const TASKS = {
+            civilian: ['Mach ein Schwarz-Weiß-Foto mit 3 Leuten.', 'Selfie mit jemandem mit Hut.', 'Prost mit jemandem, den du nicht kennst.', 'Foto von 5 Leuten auf der Tanzfläche.'],
+            detective: ['Befrage eine Person: Was hast du vor 30 Minuten gemacht?', 'Sammle 3 Alibi-Aussagen.', 'Du darfst eine Person überprüfen.'],
+            murderer: ['Täusche eine zivile Aufgabe vor.', 'Erfinde ein falsches Alibi.']
+        };
+        const $ = id => document.getElementById(id);
+
+        function roleLabel(r) { return r === 'murderer' ? 'MÖRDER' : r === 'detective' ? 'DETEKTIV' : 'CLUBBESUCHER'; }
+        function capitalizeFirstLetter(str) { if (!str) return ''; return str.charAt(0).toUpperCase() + str.slice(1); }
+
+        $('startBtn').addEventListener('click', () => {
+            const raw = $('nameInput').value.trim();
+            if (!raw) return;
+            const name = capitalizeFirstLetter(raw);
+            const r = Math.random();
+            let role = 'civilian';
+            if (r < CONFIG.murdererProb) role = 'murderer';
+            else if (r < CONFIG.murdererProb + CONFIG.detectiveProb) role = 'detective';
+            const player = { name, role, score: 0, completed: [] };
+            animateIntro(player);
+        });
+
+        function animateIntro(player) {
+            const startArea = $('startArea');
+            const nameInput = $('nameInput');
+            const roleArea = $('roleArea');
+
+            // HTML Struktur für Animation
+            roleArea.innerHTML = `
+      <span id="nameSpan">${player.name}</span>
+      <span id="duBistSpan"> DU BIST</span>
+      <span id="dotsSpan" class="dots">...</span>
+      <div id="roleSpan">${roleLabel(player.role)}</div>
+    `;
+
+            const nameSpan = $('nameSpan');
+            const duBistSpan = $('duBistSpan');
+            const dotsSpan = $('dotsSpan');
+            const roleSpan = $('roleSpan');
+
+            roleArea.style.opacity = '1';
+            nameSpan.style.opacity = '0';
+            duBistSpan.style.opacity = '0';
+            dotsSpan.style.opacity = '0';
+            roleSpan.style.opacity = '0';
+
+            // "Fliegender Name" vom Input zur Position
+            const inputRect = nameInput.getBoundingClientRect();
+            const inputStyle = window.getComputedStyle(nameInput);
+            const spanStyle = window.getComputedStyle(nameSpan);
+
+            const flyingName = document.createElement('span');
+            flyingName.textContent = player.name;
+            document.body.appendChild(flyingName);
+            flyingName.style.position = 'absolute';
+            flyingName.style.font = spanStyle.font;
+            flyingName.style.whiteSpace = 'nowrap';
+            flyingName.style.color = inputStyle.color;
+            flyingName.style.margin = '0';
+            flyingName.style.padding = '0';
+            flyingName.style.transition = 'transform 3s ease';
+
+            const startX = inputRect.left + window.scrollX + parseFloat(inputStyle.paddingLeft);
+            const startY = inputRect.top + window.scrollY + parseFloat(inputStyle.paddingTop);
+            flyingName.style.left = `${startX}px`;
+            flyingName.style.top = `${startY}px`;
+
+            // Input + Button langsam ausblenden
+            nameInput.style.transition = 'opacity 3s linear';
+            startArea.querySelector('button').style.transition = 'opacity 3s linear';
+            setTimeout(() => {
+                nameInput.style.opacity = '0';
+                startArea.querySelector('button').style.opacity = '0';
+            }, 0);
+            setTimeout(() => {
+                nameInput.style.display = 'none';
+                startArea.querySelector('button').style.display = 'none';
+            }, 3000);
+
+            // Ziel: NameSpan
+            const targetRect = nameSpan.getBoundingClientRect();
+            const deltaX = targetRect.left + window.scrollX - startX;
+            const deltaY = targetRect.top + window.scrollY - startY;
+
+            setTimeout(() => {
+                flyingName.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            }, 2500);
+
+            // Name einblenden und fliegenden Name entfernen
+            setTimeout(() => {
+                nameSpan.style.opacity = '1';
+                flyingName.remove();
+            }, 5500);
+
+            // DU BIST + Punkte einblenden
+            setTimeout(() => {
+                duBistSpan.style.opacity = '1';
+                dotsSpan.style.opacity = '1';
+            }, 6500);
+
+            // Rolle einblenden, Punkte verschwinden
+            setTimeout(() => {
+                roleSpan.style.opacity = '1';
+                dotsSpan.style.opacity = '0';
+            }, 10000);
+
+            // Gesamtsatz hoch animieren
+            setTimeout(() => {
+                roleArea.style.transition = 'transform 3s ease, font-size 1s ease';
+                roleArea.style.transform = 'translateY(-35vh)';
+                roleArea.style.fontSize = 'clamp(27px, 3vw, 24px)';
+            }, 14000);
+
+            // Weiter zum Wheel
+            setTimeout(() => {
+                startArea.style.display = 'none';
+                const wheelArea = $('wheelArea');
+
+                // Position direkt unter roleArea
+                const roleRect = roleArea.getBoundingClientRect();
+                const offset = 3; // Abstand in vh
+                const vh = window.innerHeight / 100;
+                wheelArea.style.top = `${roleRect.bottom + offset * vh}px`;
+                wheelArea.style.left = '50%';
+                wheelArea.style.transform = 'translateY(-45vh)';
+                wheelArea.style.transform = 'translateX(-50%)';
+
+                // Einblenden + klickbar machen
+                wheelArea.classList.add('show');
+                wheelArea.style.pointerEvents = 'auto';
+
+                renderWheelForRole(player.role);
+                window.currentPlayer = player;
+                if (window.currentPlayer.role !== 'murderer') {
+                    $('murdererCodeBtn').classList.remove('hidden');
+                }
+                showHamburger()
+            }, 16000);
+
+        }
+
+        function renderWheelForRole(role) {
+            const tasks = TASKS[role] || TASKS.civilian;
+            const n = tasks.length;
+            const slice = 360 / n;
+            const cols = [];
+            for (let i = 0; i < n; i++) { cols.push(i % 2 ? '#151516' : '#121213'); }
+            let grad = 'conic-gradient(';
+            for (let i = 0; i < n; i++) { grad += `${cols[i]} ${i * slice}deg ${(i + 1) * slice}deg` + (i < n - 1 ? ',' : ''); }
+            grad += ')';
+            $('wheel').style.background = grad;
+            $('wheel').dataset.tasks = JSON.stringify(tasks);
+            $('currentTask').classList.remove('hidden');
+            $('currentTask').textContent = 'Dreh das Rad...';
+        }
+
+        let spinning = false;
+        $('actionBtn').addEventListener('click', async () => {
+            const blockedUntil = loadLocal('blocked_' + window.currentPlayer.name, 0);
+            if (Date.now() < blockedUntil) {
+                const minutes = Math.ceil((blockedUntil - Date.now()) / 60000);
+                alert(`Du bist noch ${minutes} Minuten blockiert!`);
+                return;
+            }
+            const tasks = JSON.parse($('wheel').dataset.tasks || '[]');
+            if (window.currentPlayer.currentTask) {
+                addCompleted(window.currentPlayer.currentTask);
+                window.currentPlayer.score++;
+                saveLocal('completed_' + window.currentPlayer.name, window.currentPlayer.completed);
+                window.currentPlayer.currentTask = null;
+                renderDoneList();
+                $('currentTask').textContent = 'Dreh das Rad...';
+                $('actionBtn').textContent = 'Rad drehen';
+                return;
+            }
+
+            // Scrollen verhindern während Animation
+            document.body.style.overflow = 'hidden';
+
+            $('actionBtn').textContent = 'Erledigt';
+            spinning = true;
+            const n = tasks.length; const slice = 360 / n;
+            const targetIdx = Math.floor(Math.random() * tasks.length);
+            const spins = 5; const target = 360 * spins + (targetIdx * slice) + slice / 2;
+            const duration = 3000;
+            $('wheel').style.transition = `transform ${duration / 1000}s cubic-bezier(.17,.67,.34,1)`;
+            $('wheel').style.transform = `rotate(${target}deg)`;
+
+            const steps = 60;
+            let step = 0;
+            const stepTime = duration / steps;
+            const flasher = setInterval(() => {
+                const idx = step % tasks.length;
+                $('currentTask').textContent = tasks[idx];
+                step++;
+                if (step >= steps) clearInterval(flasher);
+            }, stepTime);
+
+            await new Promise(r => setTimeout(r, duration));
+            $('wheel').style.transition = '';
+            $('wheel').style.transform = `rotate(${(targetIdx * slice + slice / 2) % 360}deg)`;
+            spinning = false;
+            const task = tasks[targetIdx];
+            window.currentPlayer.currentTask = task;
+            $('currentTask').textContent = task;
+
+            // Scrollen wieder erlauben
+            document.body.style.overflow = '';
+        });
+
+        $('murdererCodeBtn').addEventListener('click', () => {
+            const code = prompt("Gib den Mörder-Code ein:");
+            if (code === CONFIG.murderCode) {
+                const unblockTime = Date.now() + 15 * 60 * 1000;
+                saveLocal('blocked_' + window.currentPlayer.name, unblockTime);
+                alert("Du bist jetzt für 15 Minuten blockiert!");
+            } else { alert("Falscher Code!"); }
+        });
+
+        function addCompleted(task) {
+            const entry = { task, date: new Date().toLocaleString() };
+            window.currentPlayer.completed.push(entry);
+            saveLocal('completed_' + window.currentPlayer.name, window.currentPlayer.completed);
+        }
+
+        function renderDoneList() {
+            const list = $('doneList');
+            const arr = (window.currentPlayer && window.currentPlayer.completed) || [];
+
+            if (arr.length === 0) {
+                list.style.display = 'none'; // unsichtbar, wenn keine Aufgaben
+                return;
+            }
+
+            list.style.display = 'block'; // sichtbar, sobald Aufgaben vorhanden
+            list.innerHTML = '';
+
+            for (let i = arr.length - 1; i >= 0; i--) {
+                const e = arr[i];
+                const d = document.createElement('div');
+                d.className = 'item';
+                d.innerHTML = `<div><strong>${e.task}</strong></div><div class=muted>${e.date}</div>`;
+                list.appendChild(d);
+            }
+        }
+
+        const hamburgerBtn = document.createElement('button');
+        const doneOverlay = document.getElementById('doneOverlay');
+        const doneOverlayList = document.getElementById('doneOverlayList');
+
+        const hamburger = $('hamburgerBtn');
+        const closeBtn = $('closeOverlayBtn');
+
+        // Hamburger erst nach Intro einblenden
+        function showHamburger() {
+            hamburger.classList.remove('hidden');
+        }
+
+        // Overlay öffnen
+        hamburger.addEventListener('click', () => {
+            renderOverlayTasks();
+            doneOverlay.classList.remove('hidden');
+        });
+
+        // Overlay schließen
+        closeBtn.addEventListener('click', () => {
+            doneOverlay.classList.add('hidden');
+        });
+
+        // Overlay Inhalte rendern
+        function renderOverlayTasks() {
+            doneOverlayList.innerHTML = '';
+            const tasks = (window.currentPlayer && window.currentPlayer.completed) || [];
+            if (tasks.length === 0) {
+                doneOverlayList.innerHTML = '<p>Keine erledigten Aufgaben.</p>';
+                return;
+            }
+            tasks.slice().reverse().forEach(e => {
+                const d = document.createElement('div');
+                d.className = 'item';
+                d.innerHTML = `<div><strong>${e.task}</strong></div><div class=muted>${e.date}</div>`;
+                doneOverlayList.appendChild(d);
+            });
+        }
+
+        function saveLocal(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+        function loadLocal(k, d) { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }
+    </script>
+</body>
+
+</html>
