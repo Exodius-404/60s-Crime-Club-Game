@@ -48,7 +48,6 @@
             max-width: 300px;
         }
 
-        /* Schöner Scrollbar für moderne Browser */
         #doneList::-webkit-scrollbar {
             width: 8px;
         }
@@ -57,8 +56,6 @@
             background-color: var(--accent-2);
             border-radius: 4px;
         }
-
-
 
         h1 {
             font-size: clamp(16px, 2vw, 20px);
@@ -71,7 +68,6 @@
             font-size: clamp(14px, 2vw, 18px);
         }
 
-        /* Perfektes Input CSS für Flying Name */
         input#nameInput {
             padding: 10px;
             border: none;
@@ -98,6 +94,7 @@
             cursor: pointer;
             transition: all 0.5s;
             font-size: clamp(14px, 1.5vw, 16px);
+            margin: 2px;
         }
 
         #startArea {
@@ -126,7 +123,6 @@
             display: inline-block;
             position: absolute;
             left: 100%;
-            /* rechts neben "DU BIST" */
             top: 0;
             white-space: nowrap;
             overflow: hidden;
@@ -160,7 +156,6 @@
             }
         }
 
-
         #duBistSpan,
         #dotsSpan,
         #roleSpan {
@@ -170,7 +165,6 @@
 
         #roleSpan {
             display: block;
-            /* auf eigene Zeile */
             margin-top: 1vh;
             font-size: 1.2em;
         }
@@ -182,38 +176,33 @@
             transition: opacity 1s linear;
             text-align: center;
             white-space: normal;
-            /* erlaubt Zeilenumbruch */
             max-width: 80vw;
             word-wrap: break-word;
             margin-top: 2vh;
             position: relative;
-            /* nicht fixed! */
             transform: none;
-            /* kein translate(-50%, -50%) */
         }
 
         .wheelArea {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5vh;
+            gap: 20px;
+            /* Abstand zwischen Task-Text und Rad */
             opacity: 0;
             pointer-events: none;
             transition: opacity 1.5s ease, transform 1.5s ease;
             width: 90vw;
             max-width: 320px;
             position: fixed;
-            /* bleibt fixiert */
             bottom: -50%;
-            /* startet unterhalb des Bildschirms */
             left: 50%;
             transform: translateX(-50%);
+            top: 30% !important;
         }
 
         .wheelArea.show {
             opacity: 1;
-            bottom: 10%;
-            /* Endposition etwas über dem unteren Rand */
         }
 
         #currentTask {
@@ -228,7 +217,6 @@
         #startArea button {
             min-width: 55px;
             margin-top: 0.5vh;
-            /* kleine Lücke zwischen Buttons */
         }
 
         #startArea,
@@ -239,7 +227,6 @@
 
         .wheel {
             width: 70vw;
-            /* kleiner auf kleinen Displays */
             max-width: 250px;
             height: 70vw;
             max-height: 250px;
@@ -251,13 +238,10 @@
 
         #wheelArea button {
             width: 70%;
-            /* passen beide Buttons nebeneinander */
             min-width: 100px;
-            /* für sehr kleine Displays */
         }
 
-
-        @media (max-width: 400px) {
+        @media (max-height: 700px) {
             .wheel {
                 width: 50vw;
                 height: 50vw;
@@ -270,8 +254,75 @@
 
             #wheelArea button {
                 width: 70%;
-                /* Buttons stapeln sich untereinander */
                 margin-top: 0.5em;
+            }
+        }
+
+        @media (max-height: 660px) {
+            .wheel {
+                width: 45vw;
+                height: 45vw;
+            }
+
+            #wheelArea {
+                flex-direction: column;
+                gap: 1vh;
+            }
+
+            #wheelArea button {
+                width: 70%;
+                margin-top: 0.5em;
+            }
+
+            @media (min-width: 300px) {
+                .wheel {
+                    max-width: 200px;
+                    max-height: 200px;
+                }
+
+                #wheelArea {
+                    flex-direction: column;
+                    gap: 1vh;
+                }
+
+                #wheelArea button {
+                    width: 70%;
+                    margin-top: 0.5em;
+                }
+            }
+        }
+
+        @media (max-height: 550px) {
+            .wheel {
+                width: 45vw;
+                height: 45vw;
+            }
+
+            #wheelArea {
+                flex-direction: column;
+                gap: 1vh;
+            }
+
+            #wheelArea button {
+                width: 70%;
+                margin-top: 0.5em;
+            }
+
+            @media (min-width: 300px) {
+                .wheel {
+                    max-width: 100px;
+                    max-height: 100px;
+                }
+
+                #wheelArea {
+                    flex-direction: column;
+                    gap: 1vh;
+                }
+
+                #wheelArea button {
+                    width: 70%;
+                    margin-top: 0.5em;
+                }
             }
         }
 
@@ -288,7 +339,7 @@
             min-height: 3em;
             font-size: clamp(14px, 2vw, 16px);
             margin-bottom: 1vh;
-            /* Abstand zum Pfeil */
+            margin-top: 4%;
             color: var(--accent-2);
             text-align: center;
             max-width: 80vw;
@@ -302,7 +353,6 @@
             text-align: left;
         }
 
-        /* Overlay Styling */
         #doneOverlay {
             position: fixed;
             top: 0;
@@ -327,8 +377,34 @@
             text-align: center;
         }
 
+        #scoreboard {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+
+        #scoreboard th,
+        #scoreboard td {
+            padding: 0.5em 1em;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #scoreboard th {
+            color: var(--accent-2);
+        }
+
+        #scoreboard td {
+            color: var(--accent);
+        }
+
         #doneOverlayList {
-            margin-top: 1em;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #111;
+            border: 1px solid var(--muted);
+            border-radius: 5px;
+            padding: 0.5em;
             text-align: left;
         }
 
@@ -337,8 +413,19 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        #doneOverlayList .item:last-child {
+            border-bottom: none;
+        }
+
         #closeOverlayBtn {
             margin-top: 1em;
+            background: var(--accent-2);
+            color: #111;
+            border: none;
+            padding: 0.7em 1.2em;
+            border-radius: 0.5em;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         #hamburgerBtn {
@@ -348,40 +435,481 @@
             width: 2.5em;
             height: 2.5em;
             font-size: 2em;
-            /* Emoji-Größe */
             background: var(--accent-1);
-            /* gelb */
             color: #111;
-            /* Emoji-Farbe bleibt dunkel */
             border: none;
             border-radius: 0.5em;
-            /* runde Ecken */
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Emoji zentrieren */
             cursor: pointer;
             z-index: 999;
             padding: 0;
         }
 
-
         .hidden {
             display: none !important;
+        }
+
+        #hintModal.show {
+            display: flex;
+        }
+
+        #adminButtons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+        }
+
+        #adminPanel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            max-width: 90vw;
+            height: 80vh;
+            /* feste Höhe für Panel */
+            padding: 1em;
+            background: #111;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            overflow: hidden;
+            /* kein Scrollen für Panel */
+            z-index: 1000;
+        }
+
+        #adminButtons {
+            flex-shrink: 0;
+            /* bleibt immer sichtbar */
+        }
+
+        #adminOverview {
+            flex-shrink: 0;
+            /* bleibt immer sichtbar */
+            border: 1px solid var(--muted);
+            border-radius: 6px;
+            background: #222;
+            padding: 0.5em 1em;
+            margin-bottom: 0.5em;
+        }
+
+        #adminOverview td {
+            padding: 0.5em 1em;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        #adminScoreboardWrapper {
+            flex: 1;
+            /* nimmt restlichen Platz */
+            overflow-y: auto;
+            /* scrollt nur die Tabelle */
+            border: 1px solid var(--muted);
+            border-radius: 6px;
+        }
+
+        /* Tabelle im Wrapper */
+        #adminScoreboard {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #adminScoreboard th,
+        #adminScoreboard td {
+            padding: 0.5em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9em;
+        }
+
+        #adminScoreboard th {
+            color: var(--accent-2);
+            text-align: left;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay .panel {
+            background: #222;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .victim-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .victim-list button {
+            padding: 10px;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            min-width: 100%;
+        }
+
+        .victim-list button:hover {
+            background: #666;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            /* Start außerhalb des Screens */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            opacity: 0;
+            transition: all 0.6s ease;
+            z-index: 3000;
+            width: 90%;
+        }
+
+        /* Sichtbar */
+        .toast.show {
+            bottom: 30px;
+            /* Endposition */
+            opacity: 1;
+        }
+
+        /* --- Hinweis-Toast mit sanfter Animation --- */
+        .hint-toast {
+            position: fixed;
+            bottom: -100px;
+            /* Startposition außerhalb des Bildschirms */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-size: 1.1em;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 90%;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+
+        /* Sichtbarer Zustand */
+        .hint-toast.show {
+            bottom: 30px;
+            opacity: 1;
+        }
+
+        /* Optional: weiche Ausblendung, bevor sie entfernt wird */
+        .hint-toast.hide {
+            bottom: -100px;
+            opacity: 0;
+        }
+
+        .hint-toast button {
+            background: #ffbf00;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .hint-toast button:hover {
+            background: #ffd84d;
+        }
+
+        /* --- Hinweis-Overlay (Clubbesucher) --- */
+        #hintModal.overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+            /* über allem außer Hamburger (999) */
+        }
+
+        #hintModal.hidden {
+            display: none !important;
+        }
+
+        #hintModal .panel {
+            background: #111;
+            color: var(--accent);
+            padding: 1.5em;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            font-family: Inter, system-ui, sans-serif;
+        }
+
+        #hintModal h2 {
+            color: var(--accent-2);
+            font-size: 1.2em;
+            margin-bottom: 0.3em;
+        }
+
+        #hintModal label {
+            font-size: 0.9em;
+            color: var(--muted);
+            text-align: left;
+        }
+
+        #hintModal select,
+        #hintModal input {
+            background: #222;
+            color: var(--accent);
+            border: 1px solid var(--muted);
+            border-radius: 6px;
+            padding: 0.6em;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        #hintModal select:focus,
+        #hintModal input:focus {
+            outline: none;
+            border-color: var(--accent-2);
+        }
+
+        #hintModal .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 1em;
+            margin-top: 0.5em;
+        }
+
+        #hintModal button {
+            padding: 0.6em 1.4em;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #hintCancelBtn {
+            background: #444;
+            color: var(--accent);
+        }
+
+        #hintCancelBtn:hover {
+            background: #666;
+        }
+
+        #hintSendBtn {
+            background: var(--accent-2);
+            color: #111;
+        }
+
+        #hintSendBtn:hover {
+            background: #ffe68a;
+        }
+
+        /* --- Mörder-Code Overlay --- */
+        #murderCodeModal.overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+            /* über allem außer Hamburger (999) */
+        }
+
+        #murderCodeModal.hidden {
+            display: none !important;
+        }
+
+        #murderCodeModal .panel {
+            background: #111;
+            color: var(--accent);
+            padding: 1.8em;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            font-family: Inter, system-ui, sans-serif;
+        }
+
+        #murderCodeModal h2 {
+            color: var(--accent-2);
+            font-size: 1.3em;
+            margin-bottom: 0.4em;
+        }
+
+        #murderCodeModal label {
+            font-size: 0.9em;
+            color: var(--muted);
+            text-align: left;
+        }
+
+        #murderCodeModal input {
+            background: #222;
+            color: var(--accent);
+            border: 1px solid var(--muted);
+            border-radius: 6px;
+            padding: 0.6em;
+            font-size: 1em;
+            width: 100%;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        #murderCodeModal input:focus {
+            outline: none;
+            border-color: var(--accent-2);
+        }
+
+        #murderCodeModal .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 1em;
+            margin-top: 0.5em;
+        }
+
+        #murderCancelBtn {
+            background: #444;
+            color: var(--accent);
+            border: none;
+            padding: 0.6em 1.4em;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #murderCancelBtn:hover {
+            background: #666;
+        }
+
+        #murderSubmitBtn {
+            background: var(--accent-2);
+            color: #111;
+            border: none;
+            padding: 0.6em 1.4em;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #murderSubmitBtn:hover {
+            background: #ffe68a;
+        }
+
+        /* --- Detective Overlay angepasst wie Mörder-Code Overlay --- */
+        #detectiveOverlay.overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+        }
+
+        #detectiveOverlay.hidden {
+            display: none !important;
+        }
+
+        #detectiveOverlay .panel {
+            background: #111;
+            color: var(--accent);
+            padding: 1.8em;
+            border-radius: 12px;
+            text-align: center;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            font-family: Inter, system-ui, sans-serif;
+        }
+
+        #detectiveOverlay h2 {
+            color: var(--accent-2);
+            font-size: 1.3em;
+            margin-bottom: 0.4em;
+        }
+
+        #detectiveOverlay button {
+            background: #444;
+            color: var(--accent);
+            border: none;
+            padding: 0.6em 1.4em;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #detectiveOverlay button:hover {
+            background: #666;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- <h1>Film Noir - 60s Crime Club Party</h1> -->
-
-    <!-- Overlay für erledigte Aufgaben-->
+    <!-- Overlay für Score und erledigte Aufgaben -->
     <div id="doneOverlay" class="hidden">
         <div id="doneOverlayContent">
-            <h2>Score</h2>
-            <div id="scoreboard"></div>
-
+            <h2>Scoreboard</h2>
+            <table id="scoreboard">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody> <!-- GANZ WICHTIG -->
+            </table>
             <h2>Erledigte Aufgaben</h2>
             <div id="doneOverlayList"></div>
             <button id="closeOverlayBtn">Schließen</button>
@@ -397,51 +925,665 @@
 
     <div id="roleArea" class="role"></div>
     <div id="wheelArea" class="wheelArea">
-        <div id="currentTask" class="taskText hidden"></div> <!-- Tasktext über dem Pfeil -->
+        <div id="currentTask" class="taskText hidden"></div>
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
         <button id="actionBtn">Rad drehen</button>
-        <button id="murdererCodeBtn" class="hidden">Mörder-Code eingeben</button>
+        <!-- <button id="murdererCodeBtn" class="hidden">Mörder-Code eingeben</button> -->
+        <!-- <button id="hintBtn" class="hidden" onclick="sendHintToDetective(window.currentPlayer)">
+            Hinweis senden
+        </button> -->
     </div>
-    <!-- <div id="doneList"></div> -->
 
+    <div id="adminPanel" class="hidden">
+        <h2>Admin Panel</h2>
+
+        <div id="adminButtons">
+            <button onclick="clearScoreboard()">Spiel Neustart</button>
+        </div>
+
+        <table id="adminOverview">
+            <tr>
+                <td>🧑‍🤝‍🧑</td>
+                <td>🔪</td>
+                <td>🕵️</td>
+                <td>🎉</td>
+            </tr>
+            <tr>
+                <td id="totalPlayers">0</td>
+                <td id="totalMurderers">0</td>
+                <td id="totalDetectives">0</td>
+                <td id="totalCivilians">0</td>
+            </tr>
+        </table>
+
+        <div id="adminScoreboardWrapper">
+            <table id="adminScoreboard">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Punkte</th>
+                        <th>Rolle</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="adminScoreboardBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Overlay für Mörder-Opfer-Auswahl -->
+    <div id="murderOverlay" class="hidden overlay">
+        <div class="panel">
+            <h2>Mörderaktion</h2>
+            <p>Wähle dein Opfer:</p>
+            <div id="murderVictimList" class="victim-list"></div>
+        </div>
+    </div>
+
+    <!-- Detective Overlay -->
+    <div id="detectiveOverlay" class="hidden overlay">
+        <div class="panel">
+            <h2>Verdächtige eine Person!</h2>
+            <div id="detectivePlayerList" class="victim-list"></div>
+            <button onclick="closeDetectiveOverlay()">Abbrechen</button>
+        </div>
+    </div>
+
+    <!-- Hinweis-Modal -->
+    <div id="hintModal" class="overlay hidden">
+        <div class="panel">
+            <h2>Anonymen Hinweis geben 🕵️‍♀️</h2>
+
+            <label for="hintTemplate">Wähle eine Satzvorlage:</label>
+            <select id="hintTemplate">
+                <option value="">– Bitte auswählen –</option>
+            </select>
+
+            <label for="hintInput">Vervollständige den Satz:</label>
+            <input id="hintInput" type="text" placeholder="z. B. eine Sonnenbrille" />
+
+            <div class="btn-row">
+                <button id="hintCancelBtn">Abbrechen</button>
+                <button id="hintSendBtn">Senden</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mörder-Code Overlay -->
+    <div id="murderCodeModal" class="overlay hidden">
+        <div class="panel">
+            <h2>Mörder-Code eingeben 🔪</h2>
+
+            <label for="murderCodeInput">Gib deinen geheimen Code ein:</label>
+            <input id="murderCodeInput" type="text" placeholder="z. B. RAVEN-42" />
+
+            <div class="btn-row">
+                <button id="murderCancelBtn">Abbrechen</button>
+                <button id="murderSubmitBtn">Bestätigen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast-Benachrichtigung -->
+    <div id="toast" class="toast hidden"></div>
+    <div id="hintToast" class="hidden hint-toast">
+        <div id="hintToastMessage"></div>
+        <button id="hintToastClose">OK</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import {
+            getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc, query, where, getDocs, getDoc
+        } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        window.setDoc = setDoc;
+        window.doc = doc;
+
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbk0sueA9MKv2ZwBoh9zb9muu8MelFq3g",
+            authDomain: "crime-club-game.firebaseapp.com",
+            projectId: "crime-club-game",
+            storageBucket: "crime-club-game.firebasestorage.app",
+            messagingSenderId: "808280379487",
+            appId: "1:808280379487:web:9107d2b3159d7b86dc4bea",
+            measurementId: "G-TYDNHNYK27"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+
+        // --- Hilfsfunktionen ---
+        function generateId() {
+            return '_' + Math.random().toString(36).slice(2, 11);
+        }
+        window.generateId = generateId;
+
+        // --- SAVE / LOAD / DELETE Spieler ---
+        export async function saveScore(player) {
+            if (!player.id) player.id = generateId();
+            const ref = doc(db, "scores", player.id);
+            await setDoc(ref, {
+                id: player.id,
+                name: player.name,
+                score: player.score || 0,
+                role: player.role || null,
+                completed: player.completed || [],
+                blockedUntil: player.blockedUntil || 0,
+                murderCode: player.murderCode || null,
+                // hintFromMurderer: player.hintFromMurderer || null
+            }, { merge: true });
+        }
+        window.saveScore = saveScore;
+
+        export async function loadPlayerFromDB(name) {
+            const q = query(collection(db, "scores"), where("name", "==", name));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+                const docSnap = snapshot.docs[0];
+                const data = docSnap.data();
+                data.id = docSnap.id;
+                if (data.blockedUntil && Date.now() >= data.blockedUntil) {
+                    data.blockedUntil = 0;
+                    await setDoc(doc(db, "scores", data.id), { blockedUntil: 0 }, { merge: true });
+                }
+                return data;
+            }
+            const id = generateId();
+            const player = { id, name, role: null, score: 0, completed: [], blockedUntil: 0 };
+            await saveScore(player);
+            return player;
+        }
+        window.loadPlayerFromDB = loadPlayerFromDB;
+
+        export async function deletePlayer(id) {
+            await deleteDoc(doc(db, "scores", id));
+        }
+        window.deletePlayer = deletePlayer;
+
+        export async function clearScoreboard() {
+            const snapshot = await getDocs(collection(db, "scores"));
+            for (const s of snapshot.docs) {
+                await deleteDoc(doc(db, "scores", s.id));
+            }
+            window.currentScores = [];
+        }
+        window.clearScoreboard = clearScoreboard;
+
+        export async function unblockPlayer(id) {
+            await setDoc(doc(db, "scores", id), { blockedUntil: 0 }, { merge: true });
+        }
+        window.unblockPlayer = unblockPlayer;
+
+        // --- Mördercode generieren / zuweisen ---
+        function generateMurderCode() {
+            const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
+            const random = parts[Math.floor(Math.random() * parts.length)];
+            const num = Math.floor(1000 + Math.random() * 9000);
+            return `${random}-${num}`;
+        }
+
+        export async function assignMurderCode(player, forceNew = false) {
+            if (!player || player.role !== "murderer") return null;
+
+            // Falls Code existiert und kein neuer gefordert ist → alten behalten
+            if (!forceNew && player.murderCode) return player.murderCode;
+
+            // Neuen Code generieren
+            const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
+            const random = parts[Math.floor(Math.random() * parts.length)];
+            const num = Math.floor(1000 + Math.random() * 9000);
+            const newCode = `${random}-${num}`;
+
+            player.murderCode = newCode;
+            await setDoc(doc(db, "scores", player.id), { murderCode: newCode }, { merge: true });
+            console.log("Neuer Mördercode für", player.name, ":", newCode);
+            return newCode;
+        }
+        window.assignMurderCode = assignMurderCode;
+
+        function assignDetectiveTask(detective) {
+            const taskText = "Das ist deine Chanche den Mörder auszuschalten!!";
+            showToast(taskText);
+
+            // Overlay öffnen
+            openDetectiveOverlay(window.currentScores || [], detective);
+        }
+
+        window.assignDetectiveTask = assignDetectiveTask;
+
+        // --- Hilfsfunktion: Mördertask aktualisieren ---
+        function updateMurderTask(player) {
+            if (!player || player.role !== "murderer" || !player.murderCode) return;
+
+            // Alten Task entfernen
+            TASKS.murderer = TASKS.murderer.filter(t => !t.startsWith("Töte eine Person!"));
+
+            // Neuen Task erstellen
+            const murderTask = `Töte eine Person! Dein Mördercode ist: ${player.murderCode}`;
+            TASKS.murderer.push(murderTask);
+            player.currentTask = murderTask;
+
+            // Wheel neu rendern
+            renderWheelForRole("murderer");
+            $("currentTask").textContent = murderTask;
+        }
+        window.updateMurderTask = updateMurderTask;
+
+        // --- Mörder-Overlay ---
+        function openMurderOverlay(victims, murderer) {
+            const overlay = document.getElementById("murderOverlay");
+            const listEl = document.getElementById("murderVictimList");
+
+            listEl.innerHTML = "";
+            victims.forEach(v => {
+                const btn = document.createElement("button");
+                const isBlocked = v.blockedUntil && Date.now() < v.blockedUntil;
+                btn.textContent = isBlocked ? `${v.name} ⏱ gesperrt` : v.name;
+                btn.disabled = isBlocked;
+
+                if (!isBlocked) {
+                    btn.onclick = async () => {
+                        const unblockTime = Date.now() + 15 * 60 * 1000;
+                        await setDoc(doc(db, "scores", v.id), {
+                            blockedUntil: unblockTime,
+                        }, { merge: true });
+
+                        // Code ERST jetzt neu generieren, aber nicht sofort aufs Rad schreiben
+                        await assignMurderCode(murderer, true);
+                        renderWheelForRole('murderer');
+
+                        closeMurderOverlay();
+                        showToast(`${v.name} wurde getötet! ⏱ 15 Minuten blockiert`);
+
+                        const actionBtn = $('actionBtn');
+                        if (actionBtn) {
+                            actionBtn.textContent = "Rad drehen";
+                            actionBtn.disabled = false;
+                        }
+
+                        if (window.currentPlayer) window.currentPlayer.currentTask = null;
+                    };
+                }
+                listEl.appendChild(btn);
+            });
+
+            overlay.classList.remove("hidden");
+        }
+
+
+        function closeMurderOverlay() {
+            document.getElementById("murderOverlay").classList.add("hidden");
+        }
+
+        // --- DETECTIVE OVERLAY + FUNKTIONEN ---
+        function openDetectiveOverlay(players, detective) {
+            const overlay = document.getElementById("detectiveOverlay");
+            const listEl = document.getElementById("detectivePlayerList");
+            const taskEl = document.getElementById("currentTask"); // Stelle sicher, dass dieses Element existiert
+            listEl.innerHTML = "";
+
+            let hasFreePlayers = false;
+
+            players.forEach(player => {
+                if (player.id === detective.id) return;
+                if (player.role === "detective") return;
+
+                const isBlocked = player.blockedUntil && Date.now() < player.blockedUntil;
+                if (!isBlocked) hasFreePlayers = true;
+
+                const btn = document.createElement("button");
+                btn.textContent = isBlocked ? `${player.name} ⏱ gesperrt` : player.name;
+                btn.disabled = isBlocked;
+
+                btn.onclick = async () => {
+                    const unblockTime = Date.now() + BLOCK_DURATION;
+
+                    await setDoc(doc(db, "scores", player.id), {
+                        blockedUntil: unblockTime
+                    }, { merge: true });
+
+                    showToast(`${player.name} wurde für 15 Minuten gesperrt! 🕵️‍♂️`);
+                    detective.currentTask = null;
+                    taskEl.textContent = "Dreh das Rad...";
+                    $('actionBtn').textContent = "Rad drehen";
+                    closeDetectiveOverlay();
+                };
+
+                listEl.appendChild(btn);
+            });
+
+            // Aufgabe ausblenden, wenn keine freien Spieler
+            if (!hasFreePlayers) {
+                taskEl.textContent = "Dreh das Rad...";
+                $('actionBtn').textContent = "Rad drehen";
+            } else {
+                taskEl.textContent = "Das ist deine Chance den Mörder auszuschalten!";
+                $('actionBtn').textContent = "Verdächtigen";
+            }
+
+            overlay.classList.remove("hidden");
+        }
+
+        function closeDetectiveOverlay() {
+            document.getElementById("detectiveOverlay").classList.add("hidden");
+        }
+
+        window.openDetectiveOverlay = openDetectiveOverlay;
+        window.closeDetectiveOverlay = closeDetectiveOverlay;
+
+        // --- DETECTIVE TASK VERWALTUNG ---
+        function updateDetectiveTask(player) {
+            if (!player || player.role !== "detective") return;
+
+            TASKS.detective = TASKS.detective.filter(t => !t.startsWith("Das ist deine Chanche den Mörder auszuschalten!"));
+            const detectiveTask = `Das ist deine Chanche den Mörder auszuschalten!`;
+            TASKS.detective.push(detectiveTask);
+            player.currentTask = detectiveTask;
+
+            renderWheelForRole("detective");
+            $("currentTask").textContent = detectiveTask;
+        }
+        window.updateDetectiveTask = updateDetectiveTask;
+
+        // --- Prüfe Mördercode + Overlay ---
+        // checkMurderCode anpassen
+        export async function checkMurderCode(player, inputCode = null) {
+            if (!player || !player.id) {
+                showToast("❌ Kein Spieler eingeloggt.");
+                return false;
+            }
+
+            // Code laden
+            const snap = await getDoc(doc(db, "scores", player.id));
+            const data = snap.exists() ? snap.data() : player;
+
+            // Code aus Overlay verwenden oder (Fallback) prompt
+            const code = inputCode?.trim() || prompt("Gib den Mörder-Code ein:");
+            if (!code) return false;
+
+            if (!data.murderCode || code.toLowerCase() !== data.murderCode.toLowerCase()) {
+                showToast("❌ Falscher Code!");
+                return false;
+            }
+
+            // ✅ Code korrekt
+            const victims = (window.currentScores || []).filter(s => s.role !== "murderer" && s.id !== player.id);
+            if (victims.length === 0) {
+                showToast("❌ Keine Opfer verfügbar.");
+                return false;
+            }
+
+            openMurderOverlay(victims, player);
+            return true;
+        }
+
+        window.checkMurderCode = checkMurderCode;
+
+        async function sendClueToDetective(hint) {
+            const detectives = (window.currentScores || []).filter(p => p.role === "detective");
+            if (detectives.length === 0) {
+                showToast("❌ Kein Detektiv verfügbar!");
+                return false;
+            }
+
+            const randomDetective = detectives[Math.floor(Math.random() * detectives.length)];
+            await setDoc(doc(db, "scores", randomDetective.id), { newHint: hint }, { merge: true });
+            showToast(`✅ Hinweis gesendet! Ein Detektiv wurde informiert.`);
+            return true;
+        }
+
+        window.sendClueToDetective = sendClueToDetective;
+
+        // --- Realtime Listener ---
+        const scoresCollection = collection(db, "scores");
+        onSnapshot(scoresCollection, async snapshot => {
+            const arr = [];
+            snapshot.forEach(docSnap => {
+                const d = docSnap.data();
+                d.id = d.id || docSnap.id;
+                arr.push(d);
+            });
+            window.currentScores = arr;
+
+            if (window.currentPlayer?.id) {
+                const me = arr.find(p => p.id === window.currentPlayer.id || p.name === window.currentPlayer.name);
+                if (me) {
+                    window.currentPlayer = me;
+                    if (typeof window.startBlockCountdown === "function") {
+                        try { window.startBlockCountdown(); } catch (e) { }
+                    }
+                }
+            }
+
+            // --- Prüfen, ob der aktuelle Spieler ein Detektiv ist und neuen Hinweis hat ---
+            if (window.currentPlayer?.role === "detective") {
+                const meDoc = arr.find(p => p.id === window.currentPlayer.id);
+                if (meDoc?.newHint) {
+                    showHintToast(meDoc.newHint);
+                }
+            }
+
+
+            if (typeof window.renderScoreboard === "function") try { window.renderScoreboard(arr); } catch (e) { }
+            if (typeof window.renderAdminScoreboard === "function") try { window.renderAdminScoreboard(); } catch (e) { }
+        });
+
+        // --- Monitor: prüft regelmäßig, ob wieder Opfer verfügbar sind ---
+        let victimMonitorStarted = false;
+        function monitorVictimAvailability() {
+            if (victimMonitorStarted) return;
+            victimMonitorStarted = true;
+
+            const intervalMs = 15000; // alle 15s prüfen
+            setInterval(() => {
+                // nur relevant für Mörder
+                const player = window.currentPlayer;
+                if (!player || player.role !== "murderer") return;
+
+                const availableVictims = (window.currentScores || []).filter(
+                    s => s.id !== player.id && s.role !== "murderer" && (!s.blockedUntil || Date.now() >= s.blockedUntil)
+                );
+
+                const hasKillTask = TASKS.murderer.some(t => t.startsWith("Töte eine Person!"));
+
+                if (availableVictims.length > 0 && !hasKillTask && player.murderCode) {
+                    // wieder hinzufügen
+                    TASKS.murderer.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+                    renderWheelForRole("murderer");
+                } else if (availableVictims.length === 0 && hasKillTask) {
+                    // entfernen
+                    TASKS.murderer = TASKS.murderer.filter(t => !t.startsWith("Töte eine Person!"));
+                    renderWheelForRole("murderer");
+                }
+            }, intervalMs);
+        }
+
+        // expose so other scripts (or after login) can start it
+        window.monitorVictimAvailability = monitorVictimAvailability;
+
+        // starten, sobald wir wissen, wer der aktuelle Spieler ist (z. B. nach login)
+        if (window.currentPlayer?.role === "murderer") monitorVictimAvailability();
+
+        function updateMurderTaskAvailability() {
+            const player = window.currentPlayer;
+            if (!player || player.role !== "murderer" || !player.murderCode) return;
+
+            const availableVictims = (window.currentScores || []).filter(
+                s => s.id !== player.id && s.role !== "murderer" && (!s.blockedUntil || Date.now() >= s.blockedUntil)
+            );
+
+            const hasKillTask = TASKS.murderer.some(t => t.startsWith("Töte eine Person!"));
+
+            if (availableVictims.length > 0 && !hasKillTask) {
+                // 🔹 Aufgabe wieder hinzufügen
+                TASKS.murderer.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+                renderWheelForRole("murderer");
+            } else if (availableVictims.length === 0 && hasKillTask) {
+                // 🔹 Aufgabe entfernen
+                TASKS.murderer = TASKS.murderer.filter(t => !t.startsWith("Töte eine Person!"));
+                renderWheelForRole("murderer");
+
+                // 🔹 Aktive Aufgabe abbrechen
+                if (player.currentTask?.startsWith("Töte eine Person!")) {
+                    if (availableVictims.length === 0 && hasKillTask) {
+                        TASKS.murderer = TASKS.murderer.filter(t => !t.startsWith("Töte eine Person!"));
+                        renderWheelForRole("murderer");
+                        // ❌ nicht nullen, sonst geht Task verloren
+                    }
+
+                    $('currentTask').textContent = 'Dreh das Rad...';
+                    $('actionBtn').textContent = 'Rad drehen';
+                }
+            }
+        }
+        window.updateMurderTaskAvailability = updateMurderTaskAvailability;
+
+        // --- Mörder-Code Overlay ---
+        const murderModal = $('murderCodeModal');
+        const murderInput = $('murderCodeInput');
+        const murderSubmitBtn = $('murderSubmitBtn');
+        const murderCancelBtn = $('murderCancelBtn');
+
+        function openMurderModal() {
+            murderInput.value = "";
+            murderModal.classList.remove('hidden');
+            setTimeout(() => murderInput.focus(), 100);
+        }
+
+        function closeMurderModal() {
+            murderModal.classList.add('hidden');
+        }
+
+        // Buttons
+        murderCancelBtn.onclick = closeMurderModal;
+        // expose modal helpers to the global scope so non-module scripts can use them
+        window.openMurderModal = openMurderModal;
+        window.closeMurderModal = closeMurderModal;
+
+        murderSubmitBtn.onclick = async () => {
+            const code = murderInput.value.trim();
+            if (!code) {
+                showToast("Bitte gib deinen Code ein!");
+                return;
+            }
+
+            try {
+                // 🔍 checkMurderCode übernimmt die Logik
+                const success = await window.checkMurderCode(window.currentPlayer, code);
+
+                if (success) {
+                    showToast("✅ Code korrekt! Du hast dein Opfer getötet.");
+                    closeMurderModal();
+
+                    // 🔄 Aufgabe abschließen & UI zurücksetzen
+                    window.currentPlayer.currentTask = null;
+                    $('currentTask').textContent = 'Dreh das Rad...';
+                    $('actionBtn').textContent = 'Rad drehen';
+                } else {
+                    showToast("❌ Falscher Code! Versuch es erneut.");
+                    // Wichtig: Aufgabe bleibt bestehen.
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Fehler beim Überprüfen des Codes!");
+            }
+        };
+
+        window.db = db;
+    </script>
 
     <script>
-        const CONFIG = { murdererProb: 0.12, detectiveProb: 0.1, murderCode: "t0t" };
-        const TASKS = {
-            civilian: ['Mach ein Schwarz-Weiß-Foto mit 3 Leuten.', 'Selfie mit jemandem mit Hut.', 'Prost mit jemandem, den du nicht kennst.', 'Foto von 5 Leuten auf der Tanzfläche.'],
-            detective: ['Befrage eine Person: Was hast du vor 30 Minuten gemacht?', 'Sammle 3 Alibi-Aussagen.', 'Du darfst eine Person überprüfen.'],
-            murderer: ['Täusche eine zivile Aufgabe vor.', 'Erfinde ein falsches Alibi.']
-        };
+        /* ---------------------------
+        UI / Game logic
+        --------------------------- */
         const $ = id => document.getElementById(id);
+        window.$ = $;
 
-        function roleLabel(r) { return r === 'murderer' ? 'MÖRDER' : r === 'detective' ? 'DETEKTIV' : 'CLUBBESUCHER'; }
-        function capitalizeFirstLetter(str) { if (!str) return ''; return str.charAt(0).toUpperCase() + str.slice(1); }
 
-        $('startBtn').addEventListener('click', () => {
+        const CONFIG = { murdererProb: 0.25, detectiveProb: 0.25 };
+
+
+        const TASKS = {
+            civilian: [
+                'Mach ein Schwarz-Weiß-Foto mit 3 Leuten.',
+                // 'Selfie mit jemandem mit Hut.',
+                // 'Prost mit jemandem, den du nicht kennst.',
+                // 'Foto von 5 Leuten auf der Tanzfläche.',
+                'Sprich mit einer Person und sammle Hinweise zum Mörder.'
+            ],
+            detective: [
+                // 'Befrage eine Person: Was hast du vor 30 Minuten gemacht?',
+                'Sammle 3 Alibi-Aussagen.',
+                "Das ist deine Chanche den Mörder auszuschalten!",
+            ],
+            murderer: [
+                'Täusche eine zivile Aufgabe vor.',
+                'Erfinde ein falsches Alibi.'
+            ]
+        };
+
+        function roleLabel(r) {
+            return r === 'murderer' ? 'MÖRDER' : r === 'detective' ? 'DETEKTIV' : 'CLUBBESUCHER';
+        }
+        function capitalizeFirstLetter(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        /* ---------- START / LOGIN ---------- */
+        $('startBtn').addEventListener('click', async () => {
             const raw = $('nameInput').value.trim();
             if (!raw) return;
             const name = capitalizeFirstLetter(raw);
-            const r = Math.random();
-            let role = 'civilian';
-            if (r < CONFIG.murdererProb) role = 'murderer';
-            else if (r < CONFIG.murdererProb + CONFIG.detectiveProb) role = 'detective';
-            const player = { name, role, score: 0, completed: [] };
+
+
+            if (name === "Clubbesitzer") { showAdminPanel(); return; }
+
+
+            const player = await window.loadPlayerFromDB(name);
+
+            if (player.role === "detective" && player.newHint) {
+                showHintToast(player.newHint);
+            }
+
+            if (!player.role) {
+                const r = Math.random();
+                if (r < CONFIG.murdererProb) player.role = 'murderer';
+                else if (r < CONFIG.murdererProb + CONFIG.detectiveProb) player.role = 'detective';
+                else player.role = 'civilian';
+                await window.saveScore(player);
+
+
+                if (player.role === "murderer") {
+                    const code = await window.assignMurderCode(player);
+                    if (code) player.murderCode = code;
+                    window.updateMurderTask(player);
+                }
+            }
+
+            window.currentPlayer = player;
             animateIntro(player);
+            startBlockCountdown();
         });
 
+        /* ---------- ANIMATION & INTRO ---------- */
+        // bleibt unverändert
         function animateIntro(player) {
             const startArea = $('startArea');
             const nameInput = $('nameInput');
             const roleArea = $('roleArea');
 
-            // HTML Struktur für Animation
             roleArea.innerHTML = `
-      <span id="nameSpan">${player.name}</span>
-      <span id="duBistSpan"> DU BIST</span>
-      <span id="dotsSpan" class="dots">...</span>
-      <div id="roleSpan">${roleLabel(player.role)}</div>
-    `;
+                <span id="nameSpan">${player.name}</span>
+                <span id="duBistSpan"> du bist</span>
+                <span id="dotsSpan" class="dots"></span>
+                <div id="roleSpan">${roleLabel(player.role)}</div>
+            `;
 
             const nameSpan = $('nameSpan');
             const duBistSpan = $('duBistSpan');
@@ -454,7 +1596,6 @@
             dotsSpan.style.opacity = '0';
             roleSpan.style.opacity = '0';
 
-            // "Fliegender Name" vom Input zur Position
             const inputRect = nameInput.getBoundingClientRect();
             const inputStyle = window.getComputedStyle(nameInput);
             const spanStyle = window.getComputedStyle(nameSpan);
@@ -470,12 +1611,11 @@
             flyingName.style.padding = '0';
             flyingName.style.transition = 'transform 3s ease';
 
-            const startX = inputRect.left + window.scrollX + parseFloat(inputStyle.paddingLeft);
-            const startY = inputRect.top + window.scrollY + parseFloat(inputStyle.paddingTop);
+            const startX = inputRect.left + window.scrollX + parseFloat(inputStyle.paddingLeft || 0);
+            const startY = inputRect.top + window.scrollY + parseFloat(inputStyle.paddingTop || 0);
             flyingName.style.left = `${startX}px`;
             flyingName.style.top = `${startY}px`;
 
-            // Input + Button langsam ausblenden
             nameInput.style.transition = 'opacity 3s linear';
             startArea.querySelector('button').style.transition = 'opacity 3s linear';
             setTimeout(() => {
@@ -485,119 +1625,170 @@
             setTimeout(() => {
                 nameInput.style.display = 'none';
                 startArea.querySelector('button').style.display = 'none';
-            }, 3000);
+            }, 3000); //Überall 0 entfert
 
-            // Ziel: NameSpan
             const targetRect = nameSpan.getBoundingClientRect();
             const deltaX = targetRect.left + window.scrollX - startX;
             const deltaY = targetRect.top + window.scrollY - startY;
 
-            setTimeout(() => {
-                flyingName.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-            }, 2500);
-
-            // Name einblenden und fliegenden Name entfernen
-            setTimeout(() => {
-                nameSpan.style.opacity = '1';
-                flyingName.remove();
-            }, 5500);
-
-            // DU BIST + Punkte einblenden
-            setTimeout(() => {
-                duBistSpan.style.opacity = '1';
-                dotsSpan.style.opacity = '1';
-            }, 6500);
-
-            // Rolle einblenden, Punkte verschwinden
-            setTimeout(() => {
-                roleSpan.style.opacity = '1';
-                dotsSpan.style.opacity = '0';
-            }, 10000);
-
-            // Gesamtsatz hoch animieren
+            setTimeout(() => { flyingName.style.transform = `translate(${deltaX}px, ${deltaY}px)`; }, 2500);//Überall 0 entfert
+            setTimeout(() => { nameSpan.style.opacity = '1'; flyingName.remove(); }, 5500);//Überall 0 entfert
+            setTimeout(() => { duBistSpan.style.opacity = '1'; dotsSpan.style.opacity = '1'; }, 6000);//Überall 0 entfert
+            setTimeout(() => { roleSpan.style.opacity = '1'; dotsSpan.style.opacity = '0'; }, 9000);//Überall 0 entfert
             setTimeout(() => {
                 roleArea.style.transition = 'transform 3s ease, font-size 1s ease';
                 roleArea.style.transform = 'translateY(-35vh)';
                 roleArea.style.fontSize = 'clamp(27px, 3vw, 24px)';
-            }, 14000);
-
-            // Weiter zum Wheel
+            }, 12000);//Überall 0 entfert
             setTimeout(() => {
                 startArea.style.display = 'none';
                 const wheelArea = $('wheelArea');
-
-                // Position direkt unter roleArea
                 const roleRect = roleArea.getBoundingClientRect();
-                const offset = 3; // Abstand in vh
                 const vh = window.innerHeight / 100;
+                const offset = 2;
                 wheelArea.style.top = `${roleRect.bottom + offset * vh}px`;
-                wheelArea.style.left = '50%';
-                wheelArea.style.transform = 'translateY(-45vh)';
-                wheelArea.style.transform = 'translateX(-50%)';
-
-                // Einblenden + klickbar machen
                 wheelArea.classList.add('show');
                 wheelArea.style.pointerEvents = 'auto';
-
                 renderWheelForRole(player.role);
-                window.currentPlayer = player;
-                if (window.currentPlayer.role !== 'murderer') {
-                    $('murdererCodeBtn').classList.remove('hidden');
-                }
-                showHamburger()
-            }, 16000);
-
+                // if (window.currentPlayer.role === 'murderer') $('murdererCodeBtn').classList.remove('hidden');
+                showHamburger();
+            }, 14000);//Überall 0 entfert
         }
 
-        function renderWheelForRole(role) {
-            const tasks = TASKS[role] || TASKS.civilian;
+        /* ---------- WHEEL RENDER + TASKS ---------- */
+        function maybeAddMurderTask(tasks, player) {
+            if (!player || player.role !== "murderer" || !player.murderCode) return tasks;
+
+            // Prüfe, ob es noch freie Opfer gibt (nicht gesperrt)
+            const availableVictims = (window.currentScores || []).filter(
+                s => s.role !== "murderer" && (!s.blockedUntil || Date.now() >= s.blockedUntil)
+            );
+
+            // Wenn keine Opfer frei → keine Mörder-Aufgabe hinzufügen
+            if (availableVictims.length === 0) {
+                console.warn("Alle Opfer gesperrt – Mörder-Aufgabe übersprungen.");
+                return tasks.filter(t => !t.startsWith("Töte eine Person!")); // sicherstellen, dass keine alte drin bleibt
+            }
+
+            // Doppelte "Töte"-Tasks entfernen
+            tasks = tasks.filter(t => !t.startsWith("Töte eine Person!"));
+            tasks.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+            return tasks;
+        }
+
+        async function renderWheelForRole(role) {
+            let tasks = TASKS[role] || TASKS.civilian;
+            if (role === "murderer") tasks = maybeAddMurderTask(tasks, window.currentPlayer);
+
             const n = tasks.length;
             const slice = 360 / n;
-            const cols = [];
-            for (let i = 0; i < n; i++) { cols.push(i % 2 ? '#151516' : '#121213'); }
+            const COLORS = ['#999999', '#808080'];
             let grad = 'conic-gradient(';
-            for (let i = 0; i < n; i++) { grad += `${cols[i]} ${i * slice}deg ${(i + 1) * slice}deg` + (i < n - 1 ? ',' : ''); }
+            for (let i = 0; i < n; i++) {
+                grad += `${COLORS[i % COLORS.length]} ${i * slice}deg ${(i + 1) * slice}deg${i < n - 1 ? ',' : ''}`;
+            }
             grad += ')';
+
             $('wheel').style.background = grad;
             $('wheel').dataset.tasks = JSON.stringify(tasks);
             $('currentTask').classList.remove('hidden');
             $('currentTask').textContent = 'Dreh das Rad...';
         }
 
-        let spinning = false;
+        // ---------- SPIN + ACTION BUTTON LOGIC ----------
+        let spinning = false; // globaler Zustand, ob das Rad gerade dreht
+
         $('actionBtn').addEventListener('click', async () => {
-            const blockedUntil = loadLocal('blocked_' + window.currentPlayer.name, 0);
-            if (Date.now() < blockedUntil) {
-                const minutes = Math.ceil((blockedUntil - Date.now()) / 60000);
-                alert(`Du bist noch ${minutes} Minuten blockiert!`);
-                return;
+            const btn = $('actionBtn');
+            const player = window.currentPlayer;
+            if (!player || spinning) return;
+
+            // 🔄 Mörder-Aufgabe ggf. live prüfen
+            if (player.role === "murderer") {
+                updateMurderTaskAvailability();
+            } else if (player.role === "detective") {
+                // Wenn Detektiv schon eine aktive Aufgabe hat
+                if (player.currentTask && player.currentTask.startsWith("Das ist deine Chanche den Mörder auszuschalten!")) {
+                    const availablePlayers = (window.currentScores || []).filter(p =>
+                        p.id !== player.id &&
+                        p.role !== "detective" &&
+                        (!p.blockedUntil || p.blockedUntil < Date.now())
+                    );
+
+                    if (availablePlayers.length === 0) {
+                        showToast("⚠️ Zurzeit noch keine Spieler verfügbar, die du sperren kannst!");
+                        player.currentTask = null;
+                        $('currentTask').textContent = 'Dreh das Rad...';
+                        btn.textContent = 'Rad drehen';
+                        return;
+                    }
+
+                    // Erst jetzt das Overlay öffnen
+                    openDetectiveOverlay(window.currentScores || [], player);
+                    return;
+                }
             }
+
             const tasks = JSON.parse($('wheel').dataset.tasks || '[]');
-            if (window.currentPlayer.currentTask) {
-                addCompleted(window.currentPlayer.currentTask);
-                window.currentPlayer.score++;
-                window.currentPlayer.score++;
-                saveScore(window.currentPlayer); // <-- HIER NEU
-                saveLocal('completed_' + window.currentPlayer.name, window.currentPlayer.completed);
-                window.currentPlayer.currentTask = null;
-                renderDoneList();
+            if (!tasks.length) return;
+
+            const currentTask = player.currentTask;
+
+            // --- FALL 1: Spieler hat bereits eine Aufgabe ---
+            if (currentTask) {
+                // Mörder-Aufgabe
+                if (currentTask.startsWith("Töte eine Person!")) {
+                    const availableVictims = (window.currentScores || []).filter(p =>
+                        p.id !== player.id &&
+                        p.role !== "murderer" &&
+                        (!p.blockedUntil || p.blockedUntil < Date.now())
+                    );
+
+                    if (availableVictims.length === 0) {
+                        showToast("⚠️ Zurzeit keine Opfer verfügbar. Aufgabe wird übersprungen!");
+                        player.currentTask = null;
+                        $('currentTask').textContent = 'Dreh das Rad...';
+                        btn.textContent = 'Rad drehen';
+                        return;
+                    }
+
+                    btn.textContent = "Mörder-Code eingeben";
+                    openMurderModal();
+                    return;
+                }
+
+                // Hinweis-Aufgabe
+                if (currentTask.startsWith("Sprich mit einer Person")) {
+                    openHintModal();
+                    // ✅ Aufgabe bleibt bestehen, bis der Hinweis gesendet wurde
+                    return;
+                }
+
+                // Normale Aufgabe
+                await addCompleted(currentTask);
+                player.currentTask = null;
                 $('currentTask').textContent = 'Dreh das Rad...';
-                $('actionBtn').textContent = 'Rad drehen';
+                btn.textContent = 'Rad drehen';
                 return;
             }
 
-            // Scrollen verhindern während Animation
+            // --- FALL 2: Kein aktiver Task → Rad drehen ---
+            spinning = true;
+            btn.disabled = true;
+            btn.textContent = 'Dreht...';
             document.body.style.overflow = 'hidden';
 
-            $('actionBtn').textContent = 'Erledigt';
-            spinning = true;
-            const n = tasks.length; const slice = 360 / n;
-            const targetIdx = Math.floor(Math.random() * tasks.length);
-            const spins = 5; const target = 360 * spins + (targetIdx * slice) + slice / 2;
+            const n = tasks.length;
+            const slice = 360 / n;
+            const targetIdx = Math.floor(Math.random() * n);
+            const spins = 5;
+            const target = 360 * spins + (targetIdx * slice) + slice / 2;
             const duration = 3000;
+
             $('wheel').style.transition = `transform ${duration / 1000}s cubic-bezier(.17,.67,.34,1)`;
             $('wheel').style.transform = `rotate(${target}deg)`;
 
+            // Flacker-Effekt
             const steps = 60;
             let step = 0;
             const stepTime = duration / steps;
@@ -611,146 +1802,496 @@
             await new Promise(r => setTimeout(r, duration));
             $('wheel').style.transition = '';
             $('wheel').style.transform = `rotate(${(targetIdx * slice + slice / 2) % 360}deg)`;
-            spinning = false;
-            const task = tasks[targetIdx];
-            window.currentPlayer.currentTask = task;
-            $('currentTask').textContent = task;
 
-            // Scrollen wieder erlauben
+            const newTask = tasks[targetIdx];
+            player.currentTask = newTask;
+            $('currentTask').textContent = newTask;
+            updateActionButton();
+
+            // --- Wenn Mörder-Aufgabe, aber keine Opfer frei: überspringen ---
+            if (player.role === "murderer" && newTask.startsWith("Töte eine Person!")) {
+                const availableVictims = (window.currentScores || []).filter(
+                    s => s.role !== "murderer" && (!s.blockedUntil || Date.now() >= s.blockedUntil)
+                );
+                if (availableVictims.length === 0) {
+                    showToast("🔄 Alle Opfer gesperrt! Aufgabe übersprungen.");
+                    player.currentTask = null;
+                    $('currentTask').textContent = "Dreh das Rad...";
+                    btn.textContent = "Rad drehen";
+                    btn.disabled = false;
+                    spinning = false;
+                    document.body.style.overflow = '';
+                    return;
+                }
+            }
+
+            // --- Abschluss: Button anpassen ---
+            btn.disabled = false;
+            btn.textContent = 'Erledigt';
+            spinning = false;
             document.body.style.overflow = '';
         });
 
-        $('murdererCodeBtn').addEventListener('click', () => {
-            const code = prompt("Gib den Mörder-Code ein:");
-            if (code === CONFIG.murderCode) {
-                const unblockTime = Date.now() + 15 * 60 * 1000;
-                saveLocal('blocked_' + window.currentPlayer.name, unblockTime);
-                alert("Du bist jetzt für 15 Minuten blockiert!");
-            } else { alert("Falscher Code!"); }
-        });
+        function updateActionButton() {
+            const player = window.currentPlayer;
+            if (!player) return;
 
-        function addCompleted(task) {
-            const entry = { task, date: new Date().toLocaleString() };
-            window.currentPlayer.completed.push(entry);
-            saveLocal('completed_' + window.currentPlayer.name, window.currentPlayer.completed);
-        }
+            const task = player.currentTask || "";
+            const btn = $('actionBtn');
+            if (!btn) return;
 
-        function renderDoneList() {
-            const list = $('doneList');
-            const arr = (window.currentPlayer && window.currentPlayer.completed) || [];
-
-            if (arr.length === 0) {
-                list.style.display = 'none'; // unsichtbar, wenn keine Aufgaben
-                return;
+            // 🔹 Unterschiedliche Texte für unterschiedliche Aufgaben
+            if (task.startsWith("Töte eine Person!")) {
+                btn.textContent = 'Mörder-Code eingeben';
+            } else if (task.startsWith("Sprich mit einer Person")) {
+                btn.textContent = 'Hinweis geben';
+                // } else if (task.startsWith("Mach ein Schwarz-Weiß-Foto")) {
+                //     btn.textContent = 'Foto gemacht';
+                // } else if (task.startsWith("Täusche eine zivile Aufgabe vor")) {
+                //     btn.textContent = 'Aufgabe vorgetäuscht';
+            } else if (task.startsWith("Du darft eine Person überprüfen")) {
+                btn.textContent = 'Person sperren';
+            } else {
+                btn.textContent = 'Rad drehen';
             }
 
-            list.style.display = 'block'; // sichtbar, sobald Aufgaben vorhanden
-            list.innerHTML = '';
-
-            for (let i = arr.length - 1; i >= 0; i--) {
-                const e = arr[i];
-                const d = document.createElement('div');
-                d.className = 'item';
-                d.innerHTML = `<div><strong>${e.task}</strong></div><div class=muted>${e.date}</div>`;
-                list.appendChild(d);
-            }
+            btn.disabled = false; // sicherstellen, dass der Button aktiv ist
         }
+        window.updateActionButton = updateActionButton; // global verfügbar
 
-        const hamburgerBtn = document.createElement('button');
-        const doneOverlay = document.getElementById('doneOverlay');
-        const doneOverlayList = document.getElementById('doneOverlayList');
+        // Aufrufen nach Task-Zuweisung
+        updateActionButton();
 
-        const hamburger = $('hamburgerBtn');
-        const closeBtn = $('closeOverlayBtn');
+        // --- Vorlagen ---
+        const HINT_TEMPLATES = [
+            "Der Mörder trägt ___",
+            "Seine Haarfarbe ist ___",
+            "Ich glaube, er mag ___",
+            "Ich habe gesehen, wie er ___",
+            "Er riecht nach ___",
+            "Er hat etwas ___ bei sich"
+        ];
 
-        // Hamburger erst nach Intro einblenden
-        function showHamburger() {
-            hamburger.classList.remove('hidden');
-        }
+        // --- DOM Referenzen ---
+        const hintModal = $('hintModal');
+        const hintSelect = $('hintTemplate');
+        const hintInput = $('hintInput');
+        const hintSendBtn = $('hintSendBtn');
+        const hintCancelBtn = $('hintCancelBtn');
 
-        // Overlay öffnen
-        hamburger.addEventListener('click', () => {
-            renderOverlayTasks();
-            doneOverlay.classList.remove('hidden');
+        // Dropdown befüllen
+        HINT_TEMPLATES.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t.replace('___', '...');
+            hintSelect.appendChild(opt);
         });
 
-        // Overlay schließen
-        closeBtn.addEventListener('click', () => {
-            doneOverlay.classList.add('hidden');
-        });
-
-        // Overlay Inhalte rendern
-        function renderOverlayTasks() {
-            doneOverlayList.innerHTML = '';
-            const tasks = (window.currentPlayer && window.currentPlayer.completed) || [];
-            if (tasks.length === 0) {
-                doneOverlayList.innerHTML = '<p>Keine erledigten Aufgaben.</p>';
-                return;
-            }
-            tasks.slice().reverse().forEach(e => {
-                const d = document.createElement('div');
-                d.className = 'item';
-                d.innerHTML = `<div><strong>${e.task}</strong></div><div class=muted>${e.date}</div>`;
-                doneOverlayList.appendChild(d);
-            });
+        // Modal öffnen / schließen
+        function openHintModal() {
+            hintSelect.value = "";
+            hintInput.value = "";
+            hintModal.classList.remove('hidden');
         }
 
-        function saveLocal(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
-        function loadLocal(k, d) { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }
-    </script>
+        function closeHintModal() {
+            hintModal.classList.add('hidden');
+        }
 
-    <script type="module">
-        // Firebase SDKs laden
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot }
-            from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-        // Deine Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCbk0sueA9MKv2ZwBoh9zb9muu8MelFq3g",
-            authDomain: "crime-club-game.firebaseapp.com",
-            projectId: "crime-club-game",
-            storageBucket: "crime-club-game.firebasestorage.app",
-            messagingSenderId: "808280379487",
-            appId: "1:808280379487:web:9107d2b3159d7b86dc4bea",
-            measurementId: "G-TYDNHNYK27"
+        hintCancelBtn.onclick = () => {
+            closeHintModal(); // nur Overlay schließen, keine Änderung am Task
         };
 
-        // Firebase initialisieren
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Hinweis senden — nutzt die vorhandene sendClueToDetective(hint)
+        hintSendBtn.onclick = async () => {
+            try {
+                if (hintSendBtn.disabled) return;
+                hintSendBtn.disabled = true;
 
-        // --- SCORE SPEICHERN ---
-        async function saveScore(player) {
-            const ref = doc(db, "scores", player.name);
-            await setDoc(ref, {
-                name: player.name,
-                score: player.score
-            }, { merge: true });
+                const player = window.currentPlayer;
+                if (!player || !player.currentTask) {
+                    hintSendBtn.disabled = false;
+                    return;
+                }
+
+                const template = hintSelect.value?.trim();
+                const freeText = hintInput.value?.trim();
+
+                // 🟡 Pflicht: Satzvorlage muss gewählt werden
+                if (!template) {
+                    showToast("⚠️ Bitte wähle eine Satzvorlage aus!");
+                    hintSendBtn.disabled = false;
+                    return;
+                }
+
+                // 🟡 Pflicht: Eingabefeld darf nicht leer sein
+                if (!freeText || freeText.length < 1) {
+                    showToast("⚠️ Bitte vervollständige den Satz!");
+                    hintSendBtn.disabled = false;
+                    return;
+                }
+
+                // 🔹 Vollständigen Hinweis zusammenbauen
+                const hint = template.replace("___", freeText);
+                const lower = hint.toLowerCase();
+
+                // 🔹 Filter: Spielernamen + Beleidigungen
+                const playerNames = (window.currentScores || [])
+                    .map(p => p.name?.toLowerCase())
+                    .filter(Boolean);
+
+                const badWords = [
+                    "idiot", "dumm", "arsch", "opfer", "wichser", "spast", "hurensohn",
+                    "bastard", "mongo", "scheiße", "verpiss", "fick", "fotze", "penner",
+                    "pissa", "blat", "blet", "pisdetz", "nichuja"
+                ];
+
+                const disabledWords = [
+                    "nö", "nein", "warum"
+                ];
+
+                // Enthält Spielernamen?
+                for (const name of playerNames) {
+                    if (name && lower.includes(name)) {
+                        showToast("❌ Du darfst keine Spielernamen im Hinweis verwenden!");
+                        hintSendBtn.disabled = false;
+                        return;
+                    }
+                }
+
+                // Enthält Beleidigung?
+                for (const word of badWords) {
+                    if (lower.includes(word)) {
+                        showToast("❌ Immer höflich bleiben! Dein Hinweis enthält beleidigungen");
+                        hintSendBtn.disabled = false;
+                        return;
+                    }
+                }
+
+                // Enthält unzulässige Wörter?
+                for (const word of disabledWords) {
+                    if (lower.includes(word)) {
+                        showToast("❌ Dein Hinweis enthält unzulässige Wörter!");
+                        hintSendBtn.disabled = false;
+                        return;
+                    }
+                }
+
+                // 🔹 Wenn alles okay → Hinweis senden
+                const success = await sendClueToDetective(hint);
+                if (!success) {
+                    showToast("❌ Kein Detektiv verfügbar oder Fehler beim Senden!");
+                    hintSendBtn.disabled = false;
+                    return;
+                }
+
+                // ✅ Aufgabe als erledigt markieren
+                await addCompleted(player.currentTask);
+
+                // UI zurücksetzen
+                player.currentTask = null;
+                $('currentTask').textContent = 'Dreh das Rad...';
+                $('actionBtn').textContent = 'Rad drehen';
+                closeHintModal();
+                hintInput.value = '';
+                hintSelect.selectedIndex = 0;
+
+            } catch (err) {
+                console.error("Fehler beim Senden des Hinweises:", err);
+                showToast("❌ Fehler beim Senden des Hinweises!");
+            } finally {
+                hintSendBtn.disabled = false;
+            }
+        };
+
+        /* ---------- BLOCK / COUNTDOWN ---------- */
+        const BLOCK_DURATION = 15 * 60 * 1000;
+        function startBlockCountdown() {
+            const actionBtn = $('actionBtn');
+            const player = window.currentPlayer;
+            if (!player) return;
+            if (player.blockedUntil && Date.now() < player.blockedUntil) {
+                let remaining = player.blockedUntil - Date.now();
+                actionBtn.disabled = true;
+                // if (player.hintFromMurderer) $('currentTask').textContent = player.hintFromMurderer;
+
+                const interval = setInterval(() => {
+                    remaining = player.blockedUntil - Date.now();
+                    if (remaining <= 0) {
+                        actionBtn.disabled = false;
+                        actionBtn.textContent = "Rad drehen";
+                        player.blockedUntil = 0;
+                        // player.hintFromMurderer = null;
+                        clearInterval(interval);
+                    } else {
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        actionBtn.textContent = `Blockiert: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+            }
         }
 
-        // --- SCOREBOARD ANZEIGEN ---
+        /* ---------- COMPLETED / SCORE ---------- */
+        async function addCompleted(task) {
+            if (!window.currentPlayer) return;
+            window.currentPlayer.completed = window.currentPlayer.completed || [];
+            window.currentPlayer.completed.push({ task, date: new Date().toLocaleString() });
+            window.currentPlayer.score = (window.currentPlayer.score || 0) + 1;
+
+            // console.log("🟢 addCompleted:", window.currentPlayer.name, "→", window.currentPlayer.score);
+
+            await window.saveScore(window.currentPlayer);
+        }
+        window.addCompleted = addCompleted; // 👈 WICHTIG!
+
+        /* ---------- LOCAL SAVE ---------- */
+        function savePlayer(player) {
+            localStorage.setItem('player_' + player.name, JSON.stringify(player));
+        }
+
+        /* ---------- SCOREBOARD / OVERLAY / ADMIN ---------- */
         function renderScoreboard(scores) {
-            const sb = document.getElementById("scoreboard");
-            sb.innerHTML = "<h3>Scoreboard</h3>";
-            scores.sort((a, b) => b.score - a.score);
+            const tbody = document.querySelector('#scoreboard tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (!Array.isArray(scores)) scores = window.currentScores || [];
+            if (window.currentPlayer) {
+                const exists = scores.find(s => s.id === window.currentPlayer.id);
+                if (!exists) scores.push({ id: window.currentPlayer.id, name: window.currentPlayer.name, score: window.currentPlayer.score });
+                else exists.score = window.currentPlayer.score;
+            }
+            scores.sort((a, b) => (b.score || 0) - (a.score || 0));
+            const nameCounts = {};
             scores.forEach(s => {
-                sb.innerHTML += `<div>${s.name}: ${s.score}</div>`;
+                nameCounts[s.name] = (nameCounts[s.name] || 0) + 1;
+                let displayName = s.name;
+                if (nameCounts[s.name] > 1) displayName += ` (${nameCounts[s.name]})`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${displayName}</td><td>${s.score || 0}</td>`;
+                tbody.appendChild(tr);
             });
         }
+        window.renderScoreboard = renderScoreboard;
 
-        // Live-Listener für Firestore
-        const q = collection(db, "scores");
-        onSnapshot(q, (snapshot) => {
-            const arr = [];
-            snapshot.forEach(doc => arr.push(doc.data()));
-            renderScoreboard(arr);
+        /* ---------- ADMIN PANEL ---------- */
+        function showAdminPanel() {
+            $('startArea').style.display = 'none';
+            $('adminPanel').classList.remove('hidden');
+            renderAdminScoreboard();
+        }
+        window.renderAdminScoreboard = function () {
+            const body = $("adminScoreboardBody"); if (!body) return;
+            body.innerHTML = '';
+            let detectives = 0, murderers = 0, civilians = 0;
+            (window.currentScores || []).forEach(p => {
+                const tr = document.createElement("tr");
+                const blocked = p.blockedUntil && Date.now() < p.blockedUntil;
+                tr.innerHTML = `
+                <td>${p.name}</td>
+                <td>${p.score || 0}</td>
+                <td>${p.role || '-'}</td>
+                <td>${blocked ? `⏱ bis ${new Date(p.blockedUntil).toLocaleTimeString()}` : '✅ frei'}</td>
+                <td>
+                <button onclick="deletePlayer('${p.id}')">❌ Löschen</button>
+                ${blocked ? `<button onclick="unblockPlayer('${p.id}')">🔓 Freigeben</button>` : ''}
+                </td>`;
+                body.appendChild(tr);
+                if (p.role === 'detective') detectives++;
+                else if (p.role === 'murderer') murderers++;
+                else civilians++;
+            });
+            $("totalPlayers").textContent = (window.currentScores || []).length;
+            $("totalDetectives").textContent = detectives;
+            $("totalMurderers").textContent = murderers;
+            $("totalCivilians").textContent = civilians;
+        };
+        // --- kleine UI helper ---
+        function showHamburger() {
+            const hamburger = $('hamburgerBtn');
+            if (hamburger) hamburger.classList.remove('hidden');
+        }
+        window.showHamburger = showHamburger; // global verfügbar machen
+
+        const hamburger = $('hamburgerBtn');
+        const doneOverlay = $('doneOverlay');
+        const closeBtn = $('closeOverlayBtn');
+
+        hamburger.addEventListener('click', () => {
+            renderOverlay();           // Scoreboard + Tasks rendern
+            doneOverlay.classList.remove('hidden'); // Overlay anzeigen
         });
 
-        // Global verfügbar machen
-        window.saveScore = saveScore;
-    </script>
+        closeBtn.addEventListener('click', () => {
+            doneOverlay.classList.add('hidden');    // Overlay schließen
+        });
 
+        function renderOverlay() {
+            renderScoreboard();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = $('doneOverlayList');
+            list.innerHTML = '';
+            const tasks = window.currentPlayer?.completed?.slice().reverse() || [];
+            if (tasks.length === 0) list.innerHTML = '<p>Keine erledigten Aufgaben.</p>';
+            else tasks.forEach(e => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `<div><strong>${e.task}</strong></div><div class="muted">${e.date}</div>`;
+                list.appendChild(div);
+            });
+        }
+        // -----------------------------
+        // Robuster Task-Watcher + Button-Text-Updater
+        // Einfügen ganz unten in dein <script>
+        // -----------------------------
+        (function () {
+            // Verhindern, dass der Watcher mehrfach gestartet wird
+            if (window.__taskWatcherStarted) return;
+            window.__taskWatcherStarted = true;
+
+            // Extrahiert den Aufgabentext zuverlässig aus verschiedenen Input-Typen
+            function _extractTaskText(input) {
+                // Wenn string -> direkt verwenden
+                if (typeof input === 'string') return input;
+
+                // Falls undefined/null -> aus currentPlayer holen
+                if (!input) return (window.currentPlayer && window.currentPlayer.currentTask) || '';
+
+                // Wenn Objekt mit .task (z.B. ein Completed-Objekt)
+                if (typeof input === 'object') {
+                    if (typeof input.task === 'string') return input.task;
+
+                    // Wenn es ein Event zu sein scheint (hat type und target) -> fallback auf currentPlayer
+                    if ('type' in input && 'target' in input) {
+                        return (window.currentPlayer && window.currentPlayer.currentTask) || '';
+                    }
+                }
+
+                // Letzter Fallback
+                return (window.currentPlayer && window.currentPlayer.currentTask) || '';
+            }
+
+            // Setzt den Button-Text passend zur aktuellen Aufgabe.
+            // taskOrEvent kann String | Event | Objekt | undefined sein.
+            function updateActionButtonText(taskOrEvent) {
+                const btn = document.getElementById('actionBtn');
+                if (!btn) return;
+
+                const taskText = _extractTaskText(taskOrEvent) || '';
+
+                // sichere Prüfung (nur wenn es wirklich ein String ist)
+                if (typeof taskText === 'string') {
+                    if (taskText.startsWith("Töte eine Person!")) {
+                        btn.textContent = "Mörder-Code eingeben";
+                    } else if (taskText.startsWith("Sprich mit einer Person")) {
+                        btn.textContent = "Hinweis geben";
+                    } else if (taskText.startsWith("Das ist deine Chanche den Mörder auszuschalten!")) {
+                        btn.textContent = 'Person sperren';
+                    } else if (taskText !== "") {
+                        btn.textContent = "Erledigt";
+                    } else {
+                        btn.textContent = "Rad drehen";
+                    }
+                } else {
+                    // Falls irgendwas unerwartetes kommt, greife auf currentPlayer zurück
+                    const fallback = (window.currentPlayer && window.currentPlayer.currentTask) ? "Erledigt" : "Rad drehen";
+                    btn.textContent = fallback;
+                }
+
+                btn.disabled = false;
+            }
+
+            // global verfügbar (optional, nützlich falls du es manuell aufrufen willst)
+            window.updateActionButtonText = updateActionButtonText;
+
+            // initial setzen (falls schon ein Task da ist)
+            updateActionButtonText();
+
+            // Watcher: prüft regelmäßig ob sich currentTask geändert hat
+            let lastTask = (window.currentPlayer && window.currentPlayer.currentTask) || '';
+            setInterval(() => {
+                const nowTask = (window.currentPlayer && window.currentPlayer.currentTask) || '';
+                if (nowTask !== lastTask) {
+                    lastTask = nowTask;
+                    updateActionButtonText(nowTask);
+                }
+            }, 100); // 100ms ist reaktionsschnell, aber leicht auf Performance geachtet
+        })();
+
+        // 🔹 Immer aufrufen, wenn currentTask sich ändern könnte
+        const originalAddCompleted = window.addCompleted;
+        window.addCompleted = async function (task) {
+            await originalAddCompleted(task);
+            updateActionButtonText();
+        };
+
+        $('actionBtn').addEventListener('click', updateActionButtonText);
+
+        function showToast(msg) {
+            const toast = $('toast');
+            toast.textContent = msg;
+
+            // Vorbereitungen: vorherige Zustände zurücksetzen
+            toast.classList.remove("hidden", "show");
+
+            // Kleiner Trick: erzwinge ein Reflow, damit die Animation sauber startet
+            void toast.offsetWidth;
+
+            // Sanft einblenden
+            toast.classList.add("show");
+
+            // Nach 6 Sekunden sanft ausblenden
+            setTimeout(() => {
+                toast.classList.remove("show");
+
+                // Nach der Transition (600ms) wieder ausblenden
+                setTimeout(() => {
+                    toast.classList.add("hidden");
+                }, 600);
+            }, 6000);
+        }
+
+        function showHintToast(hintText) {
+            setTimeout(() => {
+                const hintToast = $('hintToast');
+                const message = $('hintToastMessage');
+                const closeBtn = $('hintToastClose');
+
+                message.textContent = `🕵️ Du hast einen anonymen Hinweis erhalten: "${hintText}"`;
+
+                // Startzustand: sicherstellen, dass keine alten Klassen stören
+                hintToast.classList.remove('hidden', 'hide');
+                void hintToast.offsetWidth; // Reflow, um Transition zu resetten
+                hintToast.classList.add('show');
+
+                closeBtn.onclick = async () => {
+                    // Sanft ausblenden
+                    hintToast.classList.remove('show');
+                    hintToast.classList.add('hide');
+
+                    // Nach der Animation (600 ms) wieder "hidden" setzen
+                    setTimeout(async () => {
+                        hintToast.classList.add('hidden');
+                        hintToast.classList.remove('hide');
+
+                        // Hinweis im Firestore löschen
+                        if (window.currentPlayer?.id) {
+                            await setDoc(
+                                doc(db, "scores", window.currentPlayer.id),
+                                { newHint: null },
+                                { merge: true }
+                            );
+                        }
+                    }, 600);
+                };
+            }, 14000);
+        }
+
+
+    </script>
 
 </body>
 
