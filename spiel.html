@@ -516,12 +516,14 @@
         /* Tabelle im Wrapper */
         #adminScoreboard {
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
         }
 
         #adminScoreboard th,
         #adminScoreboard td {
             padding: 0.5em;
+            text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.9em;
         }
@@ -529,6 +531,7 @@
         #adminScoreboard th {
             color: var(--accent-2);
             text-align: left;
+            width: 25%;
         }
 
         .overlay {
@@ -964,7 +967,6 @@
                         <th>Name</th>
                         <th>Punkte</th>
                         <th>Rolle</th>
-                        <th>Status</th>
                         <th>Aktionen</th>
                     </tr>
                 </thead>
@@ -979,6 +981,7 @@
             <h2>Mörderaktion</h2>
             <p>Wähle dein Opfer:</p>
             <div id="murderVictimList" class="victim-list"></div>
+            <button onclick="closeMurderOverlay()">Abbrechen</button>
         </div>
     </div>
 
@@ -1012,7 +1015,7 @@
     </div>
 
     <!-- Mörder-Code Overlay -->
-    <div id="murderCodeModal" class="overlay hidden">
+    <!-- <div id="murderCodeModal" class="overlay hidden">
         <div class="panel">
             <h2>Mörder-Code eingeben 🔪</h2>
 
@@ -1024,7 +1027,7 @@
                 <button id="murderSubmitBtn">Bestätigen</button>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Toast-Benachrichtigung -->
     <div id="toast" class="toast hidden"></div>
@@ -1127,27 +1130,27 @@
             return `${random}-${num}`;
         }
 
-        export async function assignMurderCode(player, forceNew = false) {
-            if (!player || player.role !== "murderer") return null;
+        // export async function assignMurderCode(player, forceNew = false) {
+        //     if (!player || player.role !== "murderer") return null;
 
-            // Falls Code existiert und kein neuer gefordert ist → alten behalten
-            if (!forceNew && player.murderCode) return player.murderCode;
+        //     // Falls Code existiert und kein neuer gefordert ist → alten behalten
+        //     if (!forceNew && player.murderCode) return player.murderCode;
 
-            // Neuen Code generieren
-            const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
-            const random = parts[Math.floor(Math.random() * parts.length)];
-            const num = Math.floor(1000 + Math.random() * 9000);
-            const newCode = `${random}-${num}`;
+        //     // Neuen Code generieren
+        //     const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
+        //     const random = parts[Math.floor(Math.random() * parts.length)];
+        //     const num = Math.floor(1000 + Math.random() * 9000);
+        //     const newCode = `${random}-${num}`;
 
-            player.murderCode = newCode;
-            await setDoc(doc(db, "scores", player.id), { murderCode: newCode }, { merge: true });
-            console.log("Neuer Mördercode für", player.name, ":", newCode);
-            return newCode;
-        }
-        window.assignMurderCode = assignMurderCode;
+        //     player.murderCode = newCode;
+        //     await setDoc(doc(db, "scores", player.id), { murderCode: newCode }, { merge: true });
+        //     console.log("Neuer Mördercode für", player.name, ":", newCode);
+        //     return newCode;
+        // }
+        // window.assignMurderCode = assignMurderCode;
 
         function assignDetectiveTask(detective) {
-            const taskText = "Das ist deine Chanche den Mörder auszuschalten!!";
+            const taskText = "Das ist deine Chance den Mörder auszuschalten!!";
             showToast(taskText);
 
             // Overlay öffnen
@@ -1164,7 +1167,7 @@
             TASKS.murderer = TASKS.murderer.filter(t => !t.startsWith("Töte eine Person!"));
 
             // Neuen Task erstellen
-            const murderTask = `Töte eine Person! Dein Mördercode ist: ${player.murderCode}`;
+            const murderTask = `Töte eine Person!`;
             TASKS.murderer.push(murderTask);
             player.currentTask = murderTask;
 
@@ -1178,47 +1181,43 @@
         function openMurderOverlay(victims, murderer) {
             const overlay = document.getElementById("murderOverlay");
             const listEl = document.getElementById("murderVictimList");
-
             listEl.innerHTML = "";
-            victims.forEach(v => {
-                const btn = document.createElement("button");
-                const isBlocked = v.blockedUntil && Date.now() < v.blockedUntil;
-                btn.textContent = isBlocked ? `${v.name} ⏱ gesperrt` : v.name;
-                btn.disabled = isBlocked;
 
-                if (!isBlocked) {
-                    btn.onclick = async () => {
-                        const unblockTime = Date.now() + 15 * 60 * 1000;
-                        await setDoc(doc(db, "scores", v.id), {
-                            blockedUntil: unblockTime,
-                        }, { merge: true });
+            victims
+                .filter(v => v.id !== murderer.id && v.role !== "murderer")
+                .forEach(v => {
+                    const isBlocked = v.blockedUntil && Date.now() < v.blockedUntil;
+                    const btn = document.createElement("button");
+                    btn.textContent = isBlocked ? `${v.name} ⏱ gesperrt` : v.name;
+                    btn.disabled = isBlocked;
 
-                        // Code ERST jetzt neu generieren, aber nicht sofort aufs Rad schreiben
-                        await assignMurderCode(murderer, true);
-                        renderWheelForRole('murderer');
+                    if (!isBlocked) {
+                        btn.onclick = async () => {
+                            const unblockTime = Date.now() + 15 * 60 * 1000;
 
-                        closeMurderOverlay();
-                        showToast(`${v.name} wurde getötet! ⏱ 15 Minuten blockiert`);
+                            await setDoc(doc(db, "scores", v.id), {
+                                blockedUntil: unblockTime
+                            }, { merge: true });
 
-                        const actionBtn = $('actionBtn');
-                        if (actionBtn) {
-                            actionBtn.textContent = "Rad drehen";
-                            actionBtn.disabled = false;
-                        }
+                            showToast(`${v.name} wurde getötet! ⏱ 15 Minuten blockiert`);
+                            murderer.currentTask = null;
+                            $('currentTask').textContent = "Dreh das Rad...";
+                            $('actionBtn').textContent = "Rad drehen";
+                            closeMurderOverlay();
+                        };
+                    }
 
-                        if (window.currentPlayer) window.currentPlayer.currentTask = null;
-                    };
-                }
-                listEl.appendChild(btn);
-            });
+                    listEl.appendChild(btn);
+                });
 
             overlay.classList.remove("hidden");
         }
-
+        window.openMurderOverlay = openMurderOverlay;
 
         function closeMurderOverlay() {
             document.getElementById("murderOverlay").classList.add("hidden");
         }
+        window.closeMurderOverlay = closeMurderOverlay;
 
         // --- DETECTIVE OVERLAY + FUNKTIONEN ---
         function openDetectiveOverlay(players, detective) {
@@ -1280,8 +1279,8 @@
         function updateDetectiveTask(player) {
             if (!player || player.role !== "detective") return;
 
-            TASKS.detective = TASKS.detective.filter(t => !t.startsWith("Das ist deine Chanche den Mörder auszuschalten!"));
-            const detectiveTask = `Das ist deine Chanche den Mörder auszuschalten!`;
+            TASKS.detective = TASKS.detective.filter(t => !t.startsWith("Das ist deine Chance den Mörder auszuschalten!"));
+            const detectiveTask = `Das ist deine Chance den Mörder auszuschalten!`;
             TASKS.detective.push(detectiveTask);
             player.currentTask = detectiveTask;
 
@@ -1292,37 +1291,37 @@
 
         // --- Prüfe Mördercode + Overlay ---
         // checkMurderCode anpassen
-        export async function checkMurderCode(player, inputCode = null) {
-            if (!player || !player.id) {
-                showToast("❌ Kein Spieler eingeloggt.");
-                return false;
-            }
+        // export async function checkMurderCode(player, inputCode = null) {
+        //     if (!player || !player.id) {
+        //         showToast("❌ Kein Spieler eingeloggt.");
+        //         return false;
+        //     }
 
-            // Code laden
-            const snap = await getDoc(doc(db, "scores", player.id));
-            const data = snap.exists() ? snap.data() : player;
+        //     // Code laden
+        //     const snap = await getDoc(doc(db, "scores", player.id));
+        //     const data = snap.exists() ? snap.data() : player;
 
-            // Code aus Overlay verwenden oder (Fallback) prompt
-            const code = inputCode?.trim() || prompt("Gib den Mörder-Code ein:");
-            if (!code) return false;
+        //     // Code aus Overlay verwenden oder (Fallback) prompt
+        //     const code = inputCode?.trim() || prompt("Gib den Mörder-Code ein:");
+        //     if (!code) return false;
 
-            if (!data.murderCode || code.toLowerCase() !== data.murderCode.toLowerCase()) {
-                showToast("❌ Falscher Code!");
-                return false;
-            }
+        //     if (!data.murderCode || code.toLowerCase() !== data.murderCode.toLowerCase()) {
+        //         showToast("❌ Falscher Code!");
+        //         return false;
+        //     }
 
-            // ✅ Code korrekt
-            const victims = (window.currentScores || []).filter(s => s.role !== "murderer" && s.id !== player.id);
-            if (victims.length === 0) {
-                showToast("❌ Keine Opfer verfügbar.");
-                return false;
-            }
+        //     // ✅ Code korrekt
+        //     const victims = (window.currentScores || []).filter(s => s.role !== "murderer" && s.id !== player.id);
+        //     if (victims.length === 0) {
+        //         showToast("❌ Keine Opfer verfügbar.");
+        //         return false;
+        //     }
 
-            openMurderOverlay(victims, player);
-            return true;
-        }
+        //     openMurderOverlay(victims, player);
+        //     return true;
+        // }
 
-        window.checkMurderCode = checkMurderCode;
+        // window.checkMurderCode = checkMurderCode;
 
         async function sendClueToDetective(hint) {
             const detectives = (window.currentScores || []).filter(p => p.role === "detective");
@@ -1393,7 +1392,7 @@
 
                 if (availableVictims.length > 0 && !hasKillTask && player.murderCode) {
                     // wieder hinzufügen
-                    TASKS.murderer.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+                    TASKS.murderer.push(`Töte eine Person! `);
                     renderWheelForRole("murderer");
                 } else if (availableVictims.length === 0 && hasKillTask) {
                     // entfernen
@@ -1421,7 +1420,7 @@
 
             if (availableVictims.length > 0 && !hasKillTask) {
                 // 🔹 Aufgabe wieder hinzufügen
-                TASKS.murderer.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+                TASKS.murderer.push(`Töte eine Person!`);
                 renderWheelForRole("murderer");
             } else if (availableVictims.length === 0 && hasKillTask) {
                 // 🔹 Aufgabe entfernen
@@ -1443,56 +1442,88 @@
         }
         window.updateMurderTaskAvailability = updateMurderTaskAvailability;
 
+        function updateDetectiveTaskAvailability() {
+            const player = window.currentPlayer;
+            if (!player || player.role !== "detective") return;
+
+            const availablePlayers = (window.currentScores ?? []).filter(p =>
+                p.id !== player.id &&
+                p.role !== "detective" &&
+                (!p.blockedUntil || Date.now() >= p.blockedUntil)
+            );
+
+            const hasDetectiveTask = TASKS.detective.some(t =>
+                t.startsWith("Das ist deine Chance den Mörder auszuschalten")
+            );
+
+            if (availablePlayers.length > 0 && !hasDetectiveTask) {
+                TASKS.detective.push("Das ist deine Chance den Mörder auszuschalten!");
+                renderWheelForRole("detective");
+            } else if (availablePlayers.length === 0 && hasDetectiveTask) {
+                TASKS.detective = TASKS.detective.filter(t =>
+                    !t.startsWith("Das ist deine Chance den Mörder auszuschalten")
+                );
+                renderWheelForRole("detective");
+
+                if (player.currentTask?.startsWith("Das ist deine Chance")) {
+                    player.currentTask = null;
+                    $('currentTask').textContent = "Dreh das Rad...";
+                    $('actionBtn').textContent = "Rad drehen";
+                }
+            }
+        }
+        window.updateDetectiveTaskAvailability = updateDetectiveTaskAvailability;
+
         // --- Mörder-Code Overlay ---
         const murderModal = $('murderCodeModal');
         const murderInput = $('murderCodeInput');
         const murderSubmitBtn = $('murderSubmitBtn');
         const murderCancelBtn = $('murderCancelBtn');
 
-        function openMurderModal() {
-            murderInput.value = "";
-            murderModal.classList.remove('hidden');
-            setTimeout(() => murderInput.focus(), 100);
-        }
+        // function openMurderModal() {
+        //     murderInput.value = "";
+        //     murderModal.classList.remove('hidden');
+        //     setTimeout(() => murderInput.focus(), 100);
+        // }
 
         function closeMurderModal() {
             murderModal.classList.add('hidden');
         }
 
         // Buttons
-        murderCancelBtn.onclick = closeMurderModal;
+        // murderCancelBtn.onclick = closeMurderModal;
         // expose modal helpers to the global scope so non-module scripts can use them
-        window.openMurderModal = openMurderModal;
-        window.closeMurderModal = closeMurderModal;
+        // window.openMurderModal = openMurderModal;
+        // window.closeMurderModal = closeMurderModal;
 
-        murderSubmitBtn.onclick = async () => {
-            const code = murderInput.value.trim();
-            if (!code) {
-                showToast("Bitte gib deinen Code ein!");
-                return;
-            }
+        // murderSubmitBtn.onclick = async () => {
+        //     const code = murderInput.value.trim();
+        //     if (!code) {
+        //         showToast("Bitte gib deinen Code ein!");
+        //         return;
+        //     }
 
-            try {
-                // 🔍 checkMurderCode übernimmt die Logik
-                const success = await window.checkMurderCode(window.currentPlayer, code);
+        //     try {
+        //         // 🔍 checkMurderCode übernimmt die Logik
+        //         // const success = await window.checkMurderCode(window.currentPlayer, code);
 
-                if (success) {
-                    showToast("✅ Code korrekt! Du hast dein Opfer getötet.");
-                    closeMurderModal();
+        //         if (success) {
+        //             showToast("✅ Code korrekt! Du hast dein Opfer getötet.");
+        //             closeMurderModal();
 
-                    // 🔄 Aufgabe abschließen & UI zurücksetzen
-                    window.currentPlayer.currentTask = null;
-                    $('currentTask').textContent = 'Dreh das Rad...';
-                    $('actionBtn').textContent = 'Rad drehen';
-                } else {
-                    showToast("❌ Falscher Code! Versuch es erneut.");
-                    // Wichtig: Aufgabe bleibt bestehen.
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Fehler beim Überprüfen des Codes!");
-            }
-        };
+        //             // 🔄 Aufgabe abschließen & UI zurücksetzen
+        //             window.currentPlayer.currentTask = null;
+        //             $('currentTask').textContent = 'Dreh das Rad...';
+        //             $('actionBtn').textContent = 'Rad drehen';
+        //         } else {
+        //             showToast("❌ Falscher Code! Versuch es erneut.");
+        //             // Wichtig: Aufgabe bleibt bestehen.
+        //         }
+        //     } catch (err) {
+        //         console.error(err);
+        //         showToast("Fehler beim Überprüfen des Codes!");
+        //     }
+        // };
 
         window.db = db;
     </script>
@@ -1510,20 +1541,24 @@
 
         const TASKS = {
             civilian: [
+                'Sprich mit einer Person und sammle Hinweise zum Mörder.', //DIE AUFGABE DIE HINWEISE GEBNEN KANN
                 'Mach ein Schwarz-Weiß-Foto mit 3 Leuten.',
-                // 'Selfie mit jemandem mit Hut.',
-                // 'Prost mit jemandem, den du nicht kennst.',
-                // 'Foto von 5 Leuten auf der Tanzfläche.',
-                'Sprich mit einer Person und sammle Hinweise zum Mörder.'
+                // 'Mach ein Selfie mit eier Person die einen Hut trägt.',
+                // 'Trink mit jemandem, den du nicht kennst.',
+                // 'Mach ein Schwarz-Weiß-Foto von 5 Personen.',
+
             ],
             detective: [
-                // 'Befrage eine Person: Was hast du vor 30 Minuten gemacht?',
-                'Sammle 3 Alibi-Aussagen.',
-                "Das ist deine Chanche den Mörder auszuschalten!",
+                "Das ist deine Chance den Mörder auszuschalten!",  //DIE AUFGABE DIE LEUTE SPERREN KANN
+                'Trink mit einer Person und sammel hinweise zum Mörder!',
+                'Befrage eine Person nach ihrem Alibi.',
+
             ],
             murderer: [
-                'Täusche eine zivile Aufgabe vor.',
-                'Erfinde ein falsches Alibi.'
+                'Töte eine Person!', //DIE AUFGABE DIE LEUTE SPERREN KANN
+                'Versuch den verdacht von dir zu lenken indem du jemanden anderen als Mörder beschuldigst!',
+                'Erfinde ein falsches Alibi und merk es dir fals dich ein Detektiv fragt.',
+
             ]
         };
 
@@ -1559,11 +1594,11 @@
                 await window.saveScore(player);
 
 
-                if (player.role === "murderer") {
-                    const code = await window.assignMurderCode(player);
-                    if (code) player.murderCode = code;
-                    window.updateMurderTask(player);
-                }
+                // if (player.role === "murderer") {
+                //     const code = await window.assignMurderCode(player);
+                //     if (code) player.murderCode = code;
+                //     window.updateMurderTask(player);
+                // }
             }
 
             window.currentPlayer = player;
@@ -1672,7 +1707,7 @@
 
             // Doppelte "Töte"-Tasks entfernen
             tasks = tasks.filter(t => !t.startsWith("Töte eine Person!"));
-            tasks.push(`Töte eine Person! Dein Mördercode ist: ${player.murderCode}`);
+            tasks.push(`Töte eine Person!`);
             return tasks;
         }
 
@@ -1707,8 +1742,9 @@
             if (player.role === "murderer") {
                 updateMurderTaskAvailability();
             } else if (player.role === "detective") {
+                updateDetectiveTaskAvailability()
                 // Wenn Detektiv schon eine aktive Aufgabe hat
-                if (player.currentTask && player.currentTask.startsWith("Das ist deine Chanche den Mörder auszuschalten!")) {
+                if (player.currentTask && player.currentTask.startsWith("Das ist deine Chance den Mörder auszuschalten!")) {
                     const availablePlayers = (window.currentScores || []).filter(p =>
                         p.id !== player.id &&
                         p.role !== "detective" &&
@@ -1752,8 +1788,8 @@
                         return;
                     }
 
-                    btn.textContent = "Mörder-Code eingeben";
-                    openMurderModal();
+                    btn.textContent = "Opfer auswählen";
+                    openMurderOverlay(window.currentScores ?? [], player);
                     return;
                 }
 
@@ -1842,7 +1878,7 @@
 
             // 🔹 Unterschiedliche Texte für unterschiedliche Aufgaben
             if (task.startsWith("Töte eine Person!")) {
-                btn.textContent = 'Mörder-Code eingeben';
+                btn.textContent = 'Person Töte...';
             } else if (task.startsWith("Sprich mit einer Person")) {
                 btn.textContent = 'Hinweis geben';
                 // } else if (task.startsWith("Mach ein Schwarz-Weiß-Foto")) {
@@ -2055,20 +2091,47 @@
             const tbody = document.querySelector('#scoreboard tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
+
             if (!Array.isArray(scores)) scores = window.currentScores || [];
+
             if (window.currentPlayer) {
                 const exists = scores.find(s => s.id === window.currentPlayer.id);
-                if (!exists) scores.push({ id: window.currentPlayer.id, name: window.currentPlayer.name, score: window.currentPlayer.score });
+                if (!exists) scores.push({
+                    id: window.currentPlayer.id,
+                    name: window.currentPlayer.name,
+                    score: window.currentPlayer.score
+                });
                 else exists.score = window.currentPlayer.score;
             }
+
+            // Sortierung nach Punkten
             scores.sort((a, b) => (b.score || 0) - (a.score || 0));
-            const nameCounts = {};
-            scores.forEach(s => {
-                nameCounts[s.name] = (nameCounts[s.name] || 0) + 1;
-                let displayName = s.name;
-                if (nameCounts[s.name] > 1) displayName += ` (${nameCounts[s.name]})`;
+
+            // 🔹 Gruppiere nach Name, aber unterscheide per ID
+            const sameNameGroups = {};
+            scores.forEach(player => {
+                const name = player.name;
+                if (!sameNameGroups[name]) sameNameGroups[name] = [];
+                sameNameGroups[name].push(player);
+            });
+
+            // 🔹 Weise Nummern basierend auf Reihenfolge der IDs zu
+            const displayNames = {};
+            for (const name in sameNameGroups) {
+                if (sameNameGroups[name].length > 1) {
+                    sameNameGroups[name].forEach((p, idx) => {
+                        displayNames[p.id] = `${p.name} (${idx + 1})`;
+                    });
+                } else {
+                    displayNames[sameNameGroups[name][0].id] = sameNameGroups[name][0].name;
+                }
+            }
+
+            // 🔹 Scoreboard-Tabellenzeilen erzeugen
+            scores.forEach(player => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${displayName}</td><td>${s.score || 0}</td>`;
+                const displayName = displayNames[player.id] || player.name;
+                tr.innerHTML = `<td>${displayName}</td><td>${player.score || 0}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -2080,32 +2143,111 @@
             $('adminPanel').classList.remove('hidden');
             renderAdminScoreboard();
         }
+
         window.renderAdminScoreboard = function () {
-            const body = $("adminScoreboardBody"); if (!body) return;
+            const body = $("adminScoreboardBody");
+            if (!body) return;
             body.innerHTML = '';
             let detectives = 0, murderers = 0, civilians = 0;
+
             (window.currentScores || []).forEach(p => {
                 const tr = document.createElement("tr");
-                const blocked = p.blockedUntil && Date.now() < p.blockedUntil;
+                const now = Date.now();
+                const blocked = p.blockedUntil && now < p.blockedUntil;
+                const isManuallyPaused = p.manualPause === true;
+
+                // Pause/Freigeben Button
+                const pauseBtn = document.createElement("button");
+                pauseBtn.dataset.playerId = p.id;
+                pauseBtn.dataset.isPaused = isManuallyPaused;
+                pauseBtn.style.minWidth = "75px";
+                pauseBtn.style.maxWidth = "75px";
+                pauseBtn.style.minHeight = "60px";
+                pauseBtn.style.maxHeight = "60px";
+                pauseBtn.style.padding = "0.6em 1em";
+                pauseBtn.style.fontSize = "0.8em";
+
+                if (blocked && isManuallyPaused) {
+                    let remaining = p.blockedUntil - now;
+                    const updateLabel = () => {
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        pauseBtn.textContent = `🔓 Freigeben (${minutes}:${seconds.toString().padStart(2, '0')})`;
+                    };
+                    updateLabel();
+
+                    const interval = setInterval(() => {
+                        remaining = p.blockedUntil - Date.now();
+                        if (remaining <= 0) {
+                            clearInterval(interval);
+                            pauseBtn.textContent = "⏸ Blockieren";
+                            pauseBtn.dataset.isPaused = "false";
+                        } else {
+                            updateLabel();
+                        }
+                    }, 1000);
+                } else {
+                    pauseBtn.textContent = "⏸ Blockieren";
+                }
+
+                pauseBtn.onclick = () => {
+                    const id = pauseBtn.dataset.playerId;
+                    const isPaused = pauseBtn.dataset.isPaused === "true";
+                    togglePause(id, isPaused);
+                };
+
+                // Löschen Button
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "❌ Löschen";
+                deleteBtn.style.minWidth = "75px";
+                deleteBtn.style.maxWidth = "75px";
+                deleteBtn.style.minHeight = "60px";
+                deleteBtn.style.maxHeight = "60px";
+                deleteBtn.style.padding = "0.6em 1em";
+                deleteBtn.style.fontSize = "0.8em";
+                deleteBtn.onclick = () => deletePlayer(p.id);
+
+                // Tabellenzeile
                 tr.innerHTML = `
-                <td>${p.name}</td>
-                <td>${p.score || 0}</td>
-                <td>${p.role || '-'}</td>
-                <td>${blocked ? `⏱ bis ${new Date(p.blockedUntil).toLocaleTimeString()}` : '✅ frei'}</td>
-                <td>
-                <button onclick="deletePlayer('${p.id}')">❌ Löschen</button>
-                ${blocked ? `<button onclick="unblockPlayer('${p.id}')">🔓 Freigeben</button>` : ''}
-                </td>`;
+            <td>${p.name}</td>
+            <td>${p.score || 0}</td>
+            <td>${p.role || '-'}</td>
+        `;
+                const tdActions = document.createElement("td");
+                tdActions.appendChild(pauseBtn);
+                tdActions.appendChild(deleteBtn);
+                tr.appendChild(tdActions);
+
                 body.appendChild(tr);
+
                 if (p.role === 'detective') detectives++;
                 else if (p.role === 'murderer') murderers++;
                 else civilians++;
             });
+
             $("totalPlayers").textContent = (window.currentScores || []).length;
             $("totalDetectives").textContent = detectives;
             $("totalMurderers").textContent = murderers;
             $("totalCivilians").textContent = civilians;
         };
+
+        async function togglePause(id, isPaused) {
+            const duration = 15 * 60 * 1000;
+            const newBlockedUntil = isPaused ? 0 : Date.now() + duration;
+
+            await setDoc(doc(db, "scores", id), {
+                blockedUntil: newBlockedUntil,
+                manualPause: !isPaused
+            }, { merge: true });
+
+            showToast(isPaused
+                ? "🔓 Spieler wurde freigegeben!"
+                : "⏸ Spieler wurde für 15 Minuten blockiert.");
+
+            renderAdminScoreboard(); // UI aktualisieren
+        }
+        window.togglePause = togglePause;
+
         // --- kleine UI helper ---
         function showHamburger() {
             const hamburger = $('hamburgerBtn');
@@ -2185,10 +2327,10 @@
                 // sichere Prüfung (nur wenn es wirklich ein String ist)
                 if (typeof taskText === 'string') {
                     if (taskText.startsWith("Töte eine Person!")) {
-                        btn.textContent = "Mörder-Code eingeben";
+                        btn.textContent = "Person Töte...";
                     } else if (taskText.startsWith("Sprich mit einer Person")) {
                         btn.textContent = "Hinweis geben";
-                    } else if (taskText.startsWith("Das ist deine Chanche den Mörder auszuschalten!")) {
+                    } else if (taskText.startsWith("Das ist deine Chance den Mörder auszuschalten!")) {
                         btn.textContent = 'Person sperren';
                     } else if (taskText !== "") {
                         btn.textContent = "Erledigt";
