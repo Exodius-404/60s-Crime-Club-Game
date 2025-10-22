@@ -1084,21 +1084,28 @@
         window.saveScore = saveScore;
 
         export async function loadPlayerFromDB(name) {
-            const q = query(collection(db, "scores"), where("name", "==", name));
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
-                const docSnap = snapshot.docs[0];
-                const data = docSnap.data();
-                data.id = docSnap.id;
-                if (data.blockedUntil && Date.now() >= data.blockedUntil) {
-                    data.blockedUntil = 0;
-                    await setDoc(doc(db, "scores", data.id), { blockedUntil: 0 }, { merge: true });
+            // 🔹 Prüfe, ob es schon lokal eine gespeicherte ID gibt (vom gleichen Gerät)
+            const storedId = localStorage.getItem("playerId");
+
+            if (storedId) {
+                const ref = doc(db, "scores", storedId);
+                const snap = await getDoc(ref);
+                if (snap.exists()) {
+                    const player = snap.data();
+                    player.id = storedId;
+                    return player;
                 }
-                return data;
             }
+
+            // 🔹 Wenn keine lokale ID → neuen Spieler mit neuer ID erzeugen
             const id = generateId();
             const player = { id, name, role: null, score: 0, completed: [], blockedUntil: 0 };
+
             await saveScore(player);
+
+            // 🔹 ID lokal speichern, damit der gleiche Client sie wiederverwendet
+            localStorage.setItem("playerId", id);
+
             return player;
         }
         window.loadPlayerFromDB = loadPlayerFromDB;
