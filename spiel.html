@@ -1067,22 +1067,23 @@
         window.generateId = generateId;
 
         // --- SAVE / LOAD / DELETE Spieler ---
+        // Spieler speichern
         export async function saveScore(player) {
             if (!player.id) player.id = generateId();
             const ref = doc(db, "scores", player.id);
             await setDoc(ref, {
                 id: player.id,
                 name: player.name,
-                score: player.score || 0,
-                role: player.role || null,
-                completed: player.completed || [],
-                blockedUntil: player.blockedUntil || 0,
-                murderCode: player.murderCode || null,
-                // hintFromMurderer: player.hintFromMurderer || null
+                score: player.score ?? 0,
+                role: player.role ?? null,
+                completed: player.completed ?? [],
+                blockedUntil: player.blockedUntil ?? 0,
+                murderCode: player.murderCode ?? null
             }, { merge: true });
         }
         window.saveScore = saveScore;
 
+        // Spieler laden
         export async function loadPlayerFromDB(name) {
             const q = query(collection(db, "scores"), where("name", "==", name));
             const snapshot = await getDocs(q);
@@ -1096,13 +1097,22 @@
                 }
                 return data;
             }
+
             const id = generateId();
-            const player = { id, name, role: null, score: 0, completed: [], blockedUntil: 0 };
+            const player = {
+                id,
+                name,
+                role: null,
+                score: 0,
+                completed: [],
+                blockedUntil: 0
+            };
             await saveScore(player);
             return player;
         }
         window.loadPlayerFromDB = loadPlayerFromDB;
 
+        // Spieler löschen
         export async function deletePlayer(id) {
             await deleteDoc(doc(db, "scores", id));
         }
@@ -2094,18 +2104,15 @@
 
             if (!Array.isArray(scores)) scores = window.currentScores ?? [];
 
-            // Sortiere nach Score
             scores.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-            const nameOccurrences = {}; // Zählt, wie oft ein Name vorkommt
-            const displayNames = {};    // Speichert die Anzeige-Namen pro ID
+            const nameOccurrences = {};
+            const displayNames = {};
 
             scores.forEach((player) => {
                 const baseName = player.name;
                 nameOccurrences[baseName] = (nameOccurrences[baseName] ?? 0) + 1;
                 const count = nameOccurrences[baseName];
-
-                // Wenn Name mehrfach vorkommt, nummeriere ihn
                 const displayName = count === 1 ? baseName : `${baseName} (${count})`;
                 displayNames[player.id] = displayName;
             });
