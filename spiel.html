@@ -1066,8 +1066,6 @@
         }
         window.generateId = generateId;
 
-        // --- SAVE / LOAD / DELETE Spieler ---
-        // Spieler speichern
         export async function saveScore(player) {
             if (!player.id) player.id = generateId();
             const ref = doc(db, "scores", player.id);
@@ -1083,22 +1081,33 @@
         }
         window.saveScore = saveScore;
 
-        // Spieler laden
         export async function loadPlayerFromDB(name) {
-            const q = query(collection(db, "scores"), where("name", "==", name));
-            const snapshot = await getDocs(q);
-            if (!snapshot.empty) {
-                const docSnap = snapshot.docs[0];
-                const data = docSnap.data();
-                data.id = docSnap.id;
+            // Prüfe localStorage
+            const stored = localStorage.getItem('playerId_' + name);
+            let id;
+
+            if (stored) {
+                id = stored;
+            } else {
+                id = generateId();
+                localStorage.setItem('playerId_' + name, id);
+            }
+
+            // Prüfe, ob Spieler in Firestore existiert
+            const ref = doc(db, "scores", id);
+            const snap = await getDoc(ref);
+
+            if (snap.exists()) {
+                const data = snap.data();
+                data.id = id;
                 if (data.blockedUntil && Date.now() >= data.blockedUntil) {
                     data.blockedUntil = 0;
-                    await setDoc(doc(db, "scores", data.id), { blockedUntil: 0 }, { merge: true });
+                    await setDoc(ref, { blockedUntil: 0 }, { merge: true });
                 }
                 return data;
             }
 
-            const id = generateId();
+            // Spieler neu erstellen
             const player = {
                 id,
                 name,
@@ -1112,7 +1121,6 @@
         }
         window.loadPlayerFromDB = loadPlayerFromDB;
 
-        // Spieler löschen
         export async function deletePlayer(id) {
             await deleteDoc(doc(db, "scores", id));
         }
@@ -1133,12 +1141,12 @@
         window.unblockPlayer = unblockPlayer;
 
         // --- Mördercode generieren / zuweisen ---
-        function generateMurderCode() {
-            const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
-            const random = parts[Math.floor(Math.random() * parts.length)];
-            const num = Math.floor(1000 + Math.random() * 9000);
-            return `${random}-${num}`;
-        }
+        // function generateMurderCode() {
+        //     const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
+        //     const random = parts[Math.floor(Math.random() * parts.length)];
+        //     const num = Math.floor(1000 + Math.random() * 9000);
+        //     return `${random}-${num}`;
+        // }
 
         // export async function assignMurderCode(player, forceNew = false) {
         //     if (!player || player.role !== "murderer") return null;
