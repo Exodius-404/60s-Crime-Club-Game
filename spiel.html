@@ -2112,22 +2112,29 @@
 
             if (!Array.isArray(scores)) scores = window.currentScores ?? [];
 
+            // Sortiere nach Score
             scores.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-            const nameOccurrences = {};
-            const displayNames = {};
-
+            // Zähle Namen + IDs stabil
+            const nameMap = {};
             scores.forEach((player) => {
                 const baseName = player.name;
-                nameOccurrences[baseName] = (nameOccurrences[baseName] ?? 0) + 1;
-                const count = nameOccurrences[baseName];
-                const displayName = count === 1 ? baseName : `${baseName} (${count})`;
-                displayNames[player.id] = displayName;
+                if (!nameMap[baseName]) nameMap[baseName] = [];
+                nameMap[baseName].push(player.id);
             });
 
+            const displayNames = {};
+            Object.entries(nameMap).forEach(([name, ids]) => {
+                ids.forEach((id, index) => {
+                    displayNames[id] = index === 0 ? name : `${name} (${index + 1})`;
+                });
+            });
+
+            // Anzeige
             scores.forEach((player) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${displayNames[player.id]}</td><td>${player.score ?? 0}</td>`;
+                const displayName = displayNames[player.id] ?? player.name;
+                tr.innerHTML = `<td>${displayName}</td><td>${player.score ?? 0}</td>`;
                 tbody.appendChild(tr);
             });
         }
