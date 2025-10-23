@@ -1625,13 +1625,21 @@
 
         /* ---------- START / LOGIN ---------- */
         $('startBtn').addEventListener('click', async () => {
+            const startBtn = $('startBtn');
+            if (startBtn.disabled) return; // Kindersicherung: mehrfaches Klicken verhindern
+            startBtn.disabled = true;      // Button sofort deaktivieren
+
             const raw = $('nameInput').value.trim();
-            if (!raw) return;
+            if (!raw) {
+                startBtn.disabled = false;   // Falls kein Name eingegeben wurde, wieder aktivieren
+                return;
+            }
+
             const name = capitalizeFirstLetter(raw);
-
-
-            if (name === "Clubbesitzer") { showAdminPanel(); return; }
-
+            if (name === "Clubbesitzer") {
+                showAdminPanel();
+                return;
+            }
 
             const player = await window.loadPlayerFromDB(name);
 
@@ -1645,13 +1653,6 @@
                 else if (r < CONFIG.murdererProb + CONFIG.detectiveProb) player.role = 'detective';
                 else player.role = 'civilian';
                 await window.saveScore(player);
-
-
-                // if (player.role === "murderer") {
-                //     const code = await window.assignMurderCode(player);
-                //     if (code) player.murderCode = code;
-                //     window.updateMurderTask(player);
-                // }
             }
 
             window.currentPlayer = player;
@@ -2034,7 +2035,8 @@
                 const badWords = [
                     "idiot", "dumm", "arsch", "opfer", "wichser", "spast", "hurensohn",
                     "bastard", "mongo", "scheiße", "verpiss", "fick", "fotze", "penner",
-                    "pissa", "blat", "blet", "pisdetz", "nichuja"
+                    "pissa", "blat", "mist", "blöd", "arsch", "pisdetz", "nichuja", "blat",
+                    "wort", "wort", "wort", "wort", "wort", "wort", "wort", "wort", "wort",
                 ];
 
                 const disabledWords = [
