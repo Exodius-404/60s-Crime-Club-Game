@@ -1494,6 +1494,39 @@
         }
         window.updateDetectiveTaskAvailability = updateDetectiveTaskAvailability;
 
+        function updateCivilianTaskAvailability() {
+            const player = window.currentPlayer;
+            if (!player || player.role !== "civilian") return;
+
+            const availableDetectives = (window.currentScores ?? []).filter(p =>
+                p.role === "detective" &&
+                (!p.blockedUntil || Date.now() >= p.blockedUntil)
+            );
+
+            const hasHintTask = TASKS.civilian.some(t =>
+                t.startsWith("Sprich mit einer Person und sammle Hinweise zum Mörder")
+            );
+
+            if (availableDetectives.length === 0 && hasHintTask) {
+                // 🧹 Entferne die Aufgabe
+                TASKS.civilian = TASKS.civilian.filter(t =>
+                    !t.startsWith("Sprich mit einer Person und sammle Hinweise zum Mörder")
+                );
+                renderWheelForRole("civilian");
+
+                if (player.currentTask?.startsWith("Sprich mit einer Person")) {
+                    player.currentTask = null;
+                    $('currentTask').textContent = "Dreh das Rad...";
+                    $('actionBtn').textContent = "Rad drehen";
+                }
+            } else if (availableDetectives.length > 0 && !hasHintTask) {
+                // ✅ Wieder hinzufügen
+                TASKS.civilian.push("Sprich mit einer Person und sammle Hinweise zum Mörder.");
+                renderWheelForRole("civilian");
+            }
+        }
+        window.updateCivilianTaskAvailability = updateCivilianTaskAvailability;
+
         // --- Mörder-Code Overlay ---
         const murderModal = $('murderCodeModal');
         const murderInput = $('murderCodeInput');
@@ -1563,7 +1596,7 @@
             civilian: [
                 'Sprich mit einer Person und sammle Hinweise zum Mörder.', //DIE AUFGABE DIE HINWEISE GEBNEN KANN
                 'Mach ein Schwarz-Weiß-Foto mit 3 Leuten.',
-                // 'Mach ein Selfie mit eier Person die einen Hut trägt.',
+                'Mach ein Selfie mit eier Person die einen Hut trägt.',
                 // 'Trink mit jemandem, den du nicht kennst.',
                 // 'Mach ein Schwarz-Weiß-Foto von 5 Personen.',
 
@@ -1783,6 +1816,8 @@
                     openDetectiveOverlay(window.currentScores || [], player);
                     return;
                 }
+            } else if (player.role === "civilian") {
+                updateCivilianTaskAvailability();
             }
 
             const tasks = JSON.parse($('wheel').dataset.tasks || '[]');
