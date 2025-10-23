@@ -1212,10 +1212,11 @@
                     if (!isBlocked) {
                         btn.onclick = async () => {
                             const unblockTime = Date.now() + 15 * 60 * 1000;
-
                             await setDoc(doc(db, "scores", v.id), {
                                 blockedUntil: unblockTime
                             }, { merge: true });
+
+                            await addCompleted(`Person getötet: ${v.name}`);
 
                             showToast(`${v.name} wurde getötet! ⏱ 15 Minuten blockiert`);
                             murderer.currentTask = null;
@@ -1259,10 +1260,11 @@
 
                 btn.onclick = async () => {
                     const unblockTime = Date.now() + BLOCK_DURATION;
-
                     await setDoc(doc(db, "scores", player.id), {
                         blockedUntil: unblockTime
                     }, { merge: true });
+
+                    await addCompleted(`Person gesperrt: ${player.name}`);
 
                     showToast(`${player.name} wurde für 15 Minuten gesperrt! 🕵️‍♂️`);
                     detective.currentTask = null;
@@ -2060,29 +2062,41 @@
 
         /* ---------- BLOCK / COUNTDOWN ---------- */
         const BLOCK_DURATION = 15 * 60 * 1000;
+        let blockCountdownInterval = null;
+
         function startBlockCountdown() {
             const actionBtn = $('actionBtn');
             const player = window.currentPlayer;
-            if (!player) return;
-            if (player.blockedUntil && Date.now() < player.blockedUntil) {
-                let remaining = player.blockedUntil - Date.now();
-                actionBtn.disabled = true;
-                // if (player.hintFromMurderer) $('currentTask').textContent = player.hintFromMurderer;
+            if (!player || !actionBtn) return;
 
-                const interval = setInterval(() => {
-                    remaining = player.blockedUntil - Date.now();
-                    if (remaining <= 0) {
-                        actionBtn.disabled = false;
-                        actionBtn.textContent = "Rad drehen";
-                        player.blockedUntil = 0;
-                        // player.hintFromMurderer = null;
-                        clearInterval(interval);
-                    } else {
-                        const minutes = Math.floor(remaining / 60000);
-                        const seconds = Math.floor((remaining % 60000) / 1000);
-                        actionBtn.textContent = `Blockiert: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    }
-                }, 1000);
+            // Vorherigen Countdown stoppen
+            if (blockCountdownInterval) {
+                clearInterval(blockCountdownInterval);
+                blockCountdownInterval = null;
+            }
+
+            const updateCountdown = () => {
+                const remaining = player.blockedUntil - Date.now();
+                if (remaining <= 0) {
+                    actionBtn.disabled = false;
+                    actionBtn.textContent = "Rad drehen";
+                    player.blockedUntil = 0;
+                    clearInterval(blockCountdownInterval);
+                    blockCountdownInterval = null;
+                } else {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    actionBtn.textContent = `Blockiert: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    actionBtn.disabled = true;
+                }
+            };
+
+            if (player.blockedUntil && Date.now() < player.blockedUntil) {
+                updateCountdown();
+                blockCountdownInterval = setInterval(updateCountdown, 1000);
+            } else {
+                actionBtn.disabled = false;
+                actionBtn.textContent = "Rad drehen";
             }
         }
 
@@ -2146,22 +2160,21 @@
             renderAdminScoreboard();
         }
 
-        window.renderAdminScoreboard = function () {
+        function renderAdminScoreboard() {
             const body = $("adminScoreboardBody");
             if (!body) return;
             body.innerHTML = '';
+
             let detectives = 0, murderers = 0, civilians = 0;
 
-            (window.currentScores || []).forEach(p => {
+            (window.currentScores ?? []).forEach(p => {
                 const tr = document.createElement("tr");
                 const now = Date.now();
-                const blocked = p.blockedUntil && now < p.blockedUntil;
-                const isManuallyPaused = p.manualPause === true;
+                const isBlocked = p.blockedUntil && now < p.blockedUntil;
 
                 // Pause/Freigeben Button
                 const pauseBtn = document.createElement("button");
                 pauseBtn.dataset.playerId = p.id;
-                pauseBtn.dataset.isPaused = isManuallyPaused;
                 pauseBtn.style.minWidth = "75px";
                 pauseBtn.style.maxWidth = "75px";
                 pauseBtn.style.minHeight = "60px";
@@ -2169,33 +2182,34 @@
                 pauseBtn.style.padding = "0.6em 1em";
                 pauseBtn.style.fontSize = "0.8em";
 
-                if (blocked && isManuallyPaused) {
-                    let remaining = p.blockedUntil - now;
-                    const updateLabel = () => {
+                const updatePauseButton = () => {
+                    const remaining = p.blockedUntil && p.blockedUntil > Date.now()
+                        ? p.blockedUntil - Date.now()
+                        : 0;
+
+                    if (remaining > 0) {
                         const minutes = Math.floor(remaining / 60000);
                         const seconds = Math.floor((remaining % 60000) / 1000);
                         pauseBtn.textContent = `🔓 Freigeben (${minutes}:${seconds.toString().padStart(2, '0')})`;
-                    };
-                    updateLabel();
+                        pauseBtn.dataset.isPaused = "true";
+                    } else {
+                        pauseBtn.textContent = "⏸ Blockieren";
+                        pauseBtn.dataset.isPaused = "false";
+                    }
+                };
 
-                    const interval = setInterval(() => {
-                        remaining = p.blockedUntil - Date.now();
-                        if (remaining <= 0) {
-                            clearInterval(interval);
-                            pauseBtn.textContent = "⏸ Blockieren";
-                            pauseBtn.dataset.isPaused = "false";
-                        } else {
-                            updateLabel();
-                        }
-                    }, 1000);
-                } else {
-                    pauseBtn.textContent = "⏸ Blockieren";
-                }
+                updatePauseButton();
+                const interval = setInterval(() => {
+                    if (!document.body.contains(pauseBtn)) {
+                        clearInterval(interval);
+                        return;
+                    }
+                    updatePauseButton();
+                }, 1000);
 
                 pauseBtn.onclick = () => {
-                    const id = pauseBtn.dataset.playerId;
                     const isPaused = pauseBtn.dataset.isPaused === "true";
-                    togglePause(id, isPaused);
+                    togglePause(p.id, isPaused);
                 };
 
                 // Löschen Button
@@ -2211,15 +2225,14 @@
 
                 // Tabellenzeile
                 tr.innerHTML = `
-            <td>${p.name}</td>
-            <td>${p.score || 0}</td>
-            <td>${p.role || '-'}</td>
-        `;
+      <td>${p.name}</td>
+      <td>${p.score ?? 0}</td>
+      <td>${p.role ?? '-'}</td>
+    `;
                 const tdActions = document.createElement("td");
                 tdActions.appendChild(pauseBtn);
                 tdActions.appendChild(deleteBtn);
                 tr.appendChild(tdActions);
-
                 body.appendChild(tr);
 
                 if (p.role === 'detective') detectives++;
@@ -2227,11 +2240,11 @@
                 else civilians++;
             });
 
-            $("totalPlayers").textContent = (window.currentScores || []).length;
+            $("totalPlayers").textContent = (window.currentScores ?? []).length;
             $("totalDetectives").textContent = detectives;
             $("totalMurderers").textContent = murderers;
             $("totalCivilians").textContent = civilians;
-        };
+        }
 
         async function togglePause(id, isPaused) {
             const duration = 15 * 60 * 1000;
