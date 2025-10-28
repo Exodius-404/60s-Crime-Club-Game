@@ -31,6 +31,8 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            isolation: isolate;
+            /* trennt die Z-Ebenen sauber */
         }
 
         #doneList {
@@ -895,6 +897,71 @@
         #detectiveOverlay button:hover {
             background: #666;
         }
+
+        /* --- Rolle anzeigen / verbergen --- */
+
+        #roleArea {
+            position: relative;
+        }
+
+        #roleSpan {
+            position: relative;
+            transition: opacity 1s ease, filter 1s ease;
+            font-weight: 700;
+            user-select: none;
+
+            /* verhindert Markieren */
+            -webkit-user-select: none;
+            /* Safari/Chrome */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* IE/Edge */
+        }
+
+        /* 👁️ Rolle langsam verblassen lassen */
+        .role-hidden {
+            opacity: 0;
+            /* Schrift verblasst vollständig */
+            filter: blur(50px);
+            /* leichter Unschärfeeffekt für "Verschmelzen" */
+            transition: opacity 1s ease, filter 1s ease;
+        }
+
+        /* 👁️-Button etwas näher an den Kasten */
+        #revealRoleBtn {
+            position: fixed;
+            top: 70%;
+            /* gewünschte vertikale Position */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            border: none;
+            color: var(--accent-2);
+            font-size: 2em;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            z-index: 999999;
+            /* über alles */
+            pointer-events: auto;
+            /* Klicks erlauben */
+
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        #revealRoleBtn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #revealRoleBtn:hover,
+        #revealRoleBtn:active {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -911,7 +978,7 @@
                         <th>Score</th>
                     </tr>
                 </thead>
-                <tbody></tbody> <!-- GANZ WICHTIG -->
+                <tbody></tbody>
             </table>
             <h2>Erledigte Aufgaben</h2>
             <div id="doneOverlayList"></div>
@@ -932,10 +999,6 @@
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
         <button id="actionBtn">Rad drehen</button>
-        <!-- <button id="murdererCodeBtn" class="hidden">Mörder-Code eingeben</button> -->
-        <!-- <button id="hintBtn" class="hidden" onclick="sendHintToDetective(window.currentPlayer)">
-            Hinweis senden
-        </button> -->
     </div>
 
     <div id="adminPanel" class="hidden">
@@ -1013,21 +1076,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Mörder-Code Overlay -->
-    <!-- <div id="murderCodeModal" class="overlay hidden">
-        <div class="panel">
-            <h2>Mörder-Code eingeben 🔪</h2>
-
-            <label for="murderCodeInput">Gib deinen geheimen Code ein:</label>
-            <input id="murderCodeInput" type="text" placeholder="z. B. RAVEN-42" />
-
-            <div class="btn-row">
-                <button id="murderCancelBtn">Abbrechen</button>
-                <button id="murderSubmitBtn">Bestätigen</button>
-            </div>
-        </div>
-    </div> -->
 
     <!-- Toast-Benachrichtigung -->
     <div id="toast" class="toast hidden"></div>
@@ -1139,33 +1187,6 @@
             await setDoc(doc(db, "scores", id), { blockedUntil: 0 }, { merge: true });
         }
         window.unblockPlayer = unblockPlayer;
-
-        // --- Mördercode generieren / zuweisen ---
-        // function generateMurderCode() {
-        //     const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
-        //     const random = parts[Math.floor(Math.random() * parts.length)];
-        //     const num = Math.floor(1000 + Math.random() * 9000);
-        //     return `${random}-${num}`;
-        // }
-
-        // export async function assignMurderCode(player, forceNew = false) {
-        //     if (!player || player.role !== "murderer") return null;
-
-        //     // Falls Code existiert und kein neuer gefordert ist → alten behalten
-        //     if (!forceNew && player.murderCode) return player.murderCode;
-
-        //     // Neuen Code generieren
-        //     const parts = ["kill", "m0rt", "k!ll", "stab", "xcut", "ven0m", "sl4y"];
-        //     const random = parts[Math.floor(Math.random() * parts.length)];
-        //     const num = Math.floor(1000 + Math.random() * 9000);
-        //     const newCode = `${random}-${num}`;
-
-        //     player.murderCode = newCode;
-        //     await setDoc(doc(db, "scores", player.id), { murderCode: newCode }, { merge: true });
-        //     console.log("Neuer Mördercode für", player.name, ":", newCode);
-        //     return newCode;
-        // }
-        // window.assignMurderCode = assignMurderCode;
 
         function assignDetectiveTask(detective) {
             const taskText = "Das ist deine Chance den Mörder auszuschalten!!";
@@ -1533,50 +1554,9 @@
         const murderSubmitBtn = $('murderSubmitBtn');
         const murderCancelBtn = $('murderCancelBtn');
 
-        // function openMurderModal() {
-        //     murderInput.value = "";
-        //     murderModal.classList.remove('hidden');
-        //     setTimeout(() => murderInput.focus(), 100);
-        // }
-
         function closeMurderModal() {
             murderModal.classList.add('hidden');
         }
-
-        // Buttons
-        // murderCancelBtn.onclick = closeMurderModal;
-        // expose modal helpers to the global scope so non-module scripts can use them
-        // window.openMurderModal = openMurderModal;
-        // window.closeMurderModal = closeMurderModal;
-
-        // murderSubmitBtn.onclick = async () => {
-        //     const code = murderInput.value.trim();
-        //     if (!code) {
-        //         showToast("Bitte gib deinen Code ein!");
-        //         return;
-        //     }
-
-        //     try {
-        //         // 🔍 checkMurderCode übernimmt die Logik
-        //         // const success = await window.checkMurderCode(window.currentPlayer, code);
-
-        //         if (success) {
-        //             showToast("✅ Code korrekt! Du hast dein Opfer getötet.");
-        //             closeMurderModal();
-
-        //             // 🔄 Aufgabe abschließen & UI zurücksetzen
-        //             window.currentPlayer.currentTask = null;
-        //             $('currentTask').textContent = 'Dreh das Rad...';
-        //             $('actionBtn').textContent = 'Rad drehen';
-        //         } else {
-        //             showToast("❌ Falscher Code! Versuch es erneut.");
-        //             // Wichtig: Aufgabe bleibt bestehen.
-        //         }
-        //     } catch (err) {
-        //         console.error(err);
-        //         showToast("Fehler beim Überprüfen des Codes!");
-        //     }
-        // };
 
         window.db = db;
     </script>
@@ -1724,6 +1704,52 @@
             setTimeout(() => { nameSpan.style.opacity = '1'; flyingName.remove(); }, 5500);//Überall 0 entfert
             setTimeout(() => { duBistSpan.style.opacity = '1'; dotsSpan.style.opacity = '1'; }, 6000);//Überall 0 entfert
             setTimeout(() => { roleSpan.style.opacity = '1'; dotsSpan.style.opacity = '0'; }, 9000);//Überall 0 entfert
+            // 👁️ Nach 30 Sekunden: Rolle automatisch verbergen + Auge-Button anzeigen
+            setTimeout(() => {
+                if (!roleSpan) return;
+
+                // 👁️ Button hinzufügen, falls nicht vorhanden
+                let eyeBtn = document.getElementById("revealRoleBtn");
+                if (!eyeBtn) {
+                    eyeBtn = document.createElement("button");
+                    eyeBtn.id = "revealRoleBtn";
+                    eyeBtn.innerHTML = "👁️";
+                    eyeBtn.style.filter = "none";
+                    roleSpan.parentElement.appendChild(eyeBtn);
+                }
+
+                // Sanfte Übergangsanimation aktivieren
+                roleSpan.style.transition = "all 0.5s ease";
+
+                // Rolle verbergen
+                roleSpan.classList.add("role-hidden");
+
+                // Funktionen zum Anzeigen / Verbergen
+                // Funktionen zum Anzeigen / Verbergen + Auge ausblenden
+                const showRole = () => {
+                    roleSpan.classList.remove("role-hidden");
+                    eyeBtn.classList.add("hidden"); // 👁️ Auge verschwindet
+                };
+
+                const hideRole = () => {
+                    roleSpan.classList.add("role-hidden");
+                    eyeBtn.classList.remove("hidden"); // 👁️ Auge erscheint wieder
+                };
+
+                // Touch- & Maussteuerung
+                eyeBtn.addEventListener("mousedown", showRole);
+                eyeBtn.addEventListener("mouseup", hideRole);
+                eyeBtn.addEventListener("mouseleave", hideRole);
+                eyeBtn.addEventListener("touchstart", showRole);
+                eyeBtn.addEventListener("touchend", hideRole);
+
+                // Kleines Hinweis-Blinken
+                eyeBtn.animate(
+                    [{ opacity: 0.5 }, { opacity: 1 }, { opacity: 0.5 }],
+                    { duration: 2000, iterations: 2 }
+                );
+            }, 15000); // 30000 => 30 Sekunden
+
             setTimeout(() => {
                 roleArea.style.transition = 'transform 3s ease, font-size 1s ease';
                 roleArea.style.transform = 'translateY(-35vh)';
@@ -1743,6 +1769,23 @@
                 showHamburger();
             }, 14000);//Überall 0 entfert
         }
+
+        const showRole = () => {
+            roleSpan.classList.remove("role-hidden");
+            eyeBtn.classList.add("hidden");
+
+            // Optionale Sicherheit: andere Container temporär Klicks blockieren
+            document.getElementById("roleArea").style.pointerEvents = "none";
+        };
+
+        const hideRole = () => {
+            roleSpan.classList.add("role-hidden");
+            eyeBtn.classList.remove("hidden");
+
+            // Container wieder aktivieren
+            document.getElementById("roleArea").style.pointerEvents = "auto";
+        };
+
 
         /* ---------- WHEEL RENDER + TASKS ---------- */
         function maybeAddMurderTask(tasks, player) {
