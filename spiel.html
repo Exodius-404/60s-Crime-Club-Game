@@ -130,7 +130,7 @@
             overflow: hidden;
         }
 
-        #dotsSpan::after {
+        /* #dotsSpan::after {
             content: "...";
             display: inline-block;
             animation: dotsAnim 1s steps(4, end) infinite;
@@ -156,7 +156,7 @@
             100% {
                 content: "";
             }
-        }
+        } */
 
         #duBistSpan,
         #dotsSpan,
@@ -1647,16 +1647,32 @@
             const nameInput = $('nameInput');
             const roleArea = $('roleArea');
 
+
             roleArea.innerHTML = `
                 <span id="nameSpan">${player.name}</span>
-                <span id="duBistSpan"> du bist</span>
-                <span id="dotsSpan" class="dots"></span>
+                <span id="duBistSpan"> du bist <span id="dotsSpan"></span></span>
                 <div id="roleSpan">${roleLabel(player.role)}</div>
             `;
 
+
             const nameSpan = $('nameSpan');
             const duBistSpan = $('duBistSpan');
+
             const dotsSpan = $('dotsSpan');
+            // Punktanimation starten
+            const dots = ["", ".", "..", "..."];
+            let i = 0;
+            const dotInterval = setInterval(() => {
+                if (dotsSpan.style.opacity === '1') {
+                    dotsSpan.textContent = dots[i++ % dots.length];
+                }
+            }, 270);
+
+            setTimeout(() => {
+                clearInterval(dotInterval);
+                dotsSpan.textContent = ""; // oder "..." falls du einen festen Abschluss willst
+            }, 9000);
+
             const roleSpan = $('roleSpan');
 
             roleArea.style.opacity = '1';
@@ -1748,7 +1764,7 @@
                     [{ opacity: 0.5 }, { opacity: 1 }, { opacity: 0.5 }],
                     { duration: 2000, iterations: 2 }
                 );
-            }, 15000); // 30000 => 30 Sekunden
+            }, 30000); // 30000 => 30 Sekunden
 
             setTimeout(() => {
                 roleArea.style.transition = 'transform 3s ease, font-size 1s ease';
@@ -2526,7 +2542,6 @@
                 };
             }, 14000);
         }
-
 
     </script>
 
