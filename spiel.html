@@ -1879,15 +1879,20 @@
             wheel.style.background = grad;
             wheel.dataset.tasks = JSON.stringify(tasks);
 
+            showTaskToast([
+                `Element gefunden: ${!!taskDisplay}`,
+                `Neue Aufgabe: ${newTask}`
+            ]);
+
             const taskDisplay = document.getElementById('currentTask');
-            const currentTask = window.currentPlayer?.currentTask;
-
-            // 🧪 Debug-Toast zur Kontrolle
-            showTaskToast([`Aktuelle Aufgabe: ${currentTask ?? 'Keine'}`]);
-
             if (taskDisplay) {
-                taskDisplay.textContent = currentTask ?? 'Dreh das Rad...';
+                taskDisplay.textContent = newTask;
+
+                // 🛠️ Safari-Fix: Sichtbarkeit erzwingen
+                taskDisplay.style.display = 'block';
                 taskDisplay.classList.remove('hidden');
+                taskDisplay.style.opacity = '1';
+                taskDisplay.style.visibility = 'visible';
             } else {
                 console.warn("Element #currentTask nicht gefunden!");
             }
