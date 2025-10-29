@@ -1857,22 +1857,35 @@
         }
 
         async function renderWheelForRole(role) {
-            let tasks = TASKS[role] || TASKS.civilian;
-            if (role === "murderer") tasks = maybeAddMurderTask(tasks, window.currentPlayer);
+            let tasks = TASKS[role] ?? [];
+            if (role === "murderer") {
+                tasks = maybeAddMurderTask(tasks, window.currentPlayer);
+            }
 
             const n = tasks.length;
             const slice = 360 / n;
             const COLORS = ['#999999', '#808080'];
             let grad = 'conic-gradient(';
+
             for (let i = 0; i < n; i++) {
                 grad += `${COLORS[i % COLORS.length]} ${i * slice}deg ${(i + 1) * slice}deg${i < n - 1 ? ',' : ''}`;
             }
             grad += ')';
 
-            $('wheel').style.background = grad;
-            $('wheel').dataset.tasks = JSON.stringify(tasks);
-            $('currentTask').classList.remove('hidden');
-            $('currentTask').textContent = 'Dreh das Rad...';
+            const wheel = $('wheel');
+            wheel.style.background = grad;
+            wheel.dataset.tasks = JSON.stringify(tasks);
+
+            // Zeige die aktuelle Aufgabe korrekt an
+            const currentTask = window.currentPlayer?.currentTask;
+            const taskDisplay = $('currentTask');
+            if (currentTask) {
+                taskDisplay.textContent = currentTask;
+            } else {
+                taskDisplay.textContent = 'Dreh das Rad...';
+            }
+
+            taskDisplay.classList.remove('hidden');
         }
 
         // ---------- SPIN + ACTION BUTTON LOGIC ----------
