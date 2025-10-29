@@ -918,6 +918,18 @@
             transition: opacity 1s ease, filter 1s ease;
         }
 
+        @keyframes blinkEye {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
         /* 👁️-Button etwas näher an den Kasten */
         #revealRoleBtn {
             position: fixed;
@@ -928,14 +940,17 @@
             background: transparent;
             border: none;
             color: var(--accent-2);
-            font-size: 2em;
+            font-size: 0.6em;
+            min-width: 7em;
             cursor: pointer;
             opacity: 0.8;
-            transition: opacity 0.3s ease, transform 0.2s ease;
+            transition: none;
             z-index: 999999;
             /* über alles */
             pointer-events: auto;
             /* Klicks erlauben */
+
+            animation: blinkEye 2s infinite;
 
             user-select: none;
             -webkit-user-select: none;
@@ -1735,7 +1750,7 @@
                 if (!eyeBtn) {
                     eyeBtn = document.createElement("button");
                     eyeBtn.id = "revealRoleBtn";
-                    eyeBtn.innerHTML = "👁️";
+                    eyeBtn.innerHTML = "👁️ <br> Halt mich";
                     eyeBtn.style.filter = "none";
                     roleSpan.parentElement.appendChild(eyeBtn);
                 }
@@ -1746,16 +1761,25 @@
                 // Rolle verbergen
                 roleSpan.classList.add("role-hidden");
 
-                // Funktionen zum Anzeigen / Verbergen
-                // Funktionen zum Anzeigen / Verbergen + Auge ausblenden
+
+                let hideTimeout;
+
                 const showRole = () => {
                     roleSpan.classList.remove("role-hidden");
-                    eyeBtn.classList.add("hidden"); // 👁️ Auge verschwindet
+                    eyeBtn.classList.add("hidden");
+
+                    // Starte Timer zum automatischen Verbergen
+                    clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(() => {
+                        roleSpan.classList.add("role-hidden");
+                        eyeBtn.classList.remove("hidden");
+                    }, 10000); // 10 Sekunden
                 };
 
                 const hideRole = () => {
                     roleSpan.classList.add("role-hidden");
-                    eyeBtn.classList.remove("hidden"); // 👁️ Auge erscheint wieder
+                    eyeBtn.classList.remove("hidden");
+                    clearTimeout(hideTimeout);
                 };
 
                 // Touch- & Maussteuerung
@@ -1764,6 +1788,8 @@
                 eyeBtn.addEventListener("mouseleave", hideRole);
                 eyeBtn.addEventListener("touchstart", showRole);
                 eyeBtn.addEventListener("touchend", hideRole);
+
+                if (!roleSpan.classList.contains("role-hidden")) return;
 
                 // Kleines Hinweis-Blinken
                 eyeBtn.animate(
