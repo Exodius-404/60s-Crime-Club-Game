@@ -198,6 +198,8 @@
         }
 
         #currentTask {
+            display: block !important;
+            visibility: visible !important;
             font-size: clamp(14px, 2vw, 16px);
             color: var(--accent-2);
             text-align: center;
@@ -1855,16 +1857,12 @@
             tasks.push(`Töte eine Person!`);
             return tasks;
         }
-
+        
         async function renderWheelForRole(role) {
             let tasks = TASKS[role] ?? [];
-
             if (role === "murderer") {
                 tasks = maybeAddMurderTask(tasks, window.currentPlayer);
             }
-
-            // 🧪 Zeige Toast mit den geladenen Aufgaben
-            showTaskToast(tasks);
 
             const n = tasks.length;
             const slice = 360 / n;
@@ -1875,26 +1873,17 @@
             }
             grad += ')';
 
-            const wheel = document.getElementById('wheel');
+            const wheel = $('wheel');
             wheel.style.background = grad;
             wheel.dataset.tasks = JSON.stringify(tasks);
 
-            showTaskToast([
-                `Element gefunden: ${!!taskDisplay}`,
-                `Neue Aufgabe: ${newTask}`
-            ]);
-
-            const taskDisplay = document.getElementById('currentTask');
+            const currentTask = window.currentPlayer?.currentTask;
+            const taskDisplay = $('currentTask');
             if (taskDisplay) {
-                taskDisplay.textContent = newTask;
-
-                // 🛠️ Safari-Fix: Sichtbarkeit erzwingen
-                taskDisplay.style.display = 'block';
                 taskDisplay.classList.remove('hidden');
-                taskDisplay.style.opacity = '1';
-                taskDisplay.style.visibility = 'visible';
-            } else {
-                console.warn("Element #currentTask nicht gefunden!");
+                taskDisplay.style.display = 'block';
+                taskDisplay.textContent = currentTask || 'Dreh das Rad...';
+                void taskDisplay.offsetHeight; // Safari-Fix
             }
         }
 
@@ -1904,7 +1893,6 @@
         $('actionBtn').addEventListener('click', async () => {
             const btn = $('actionBtn');
             const player = window.currentPlayer;
-
             if (!player || spinning) return;
 
             // 🔄 Mörder-Aufgabe ggf. live prüfen
@@ -2010,24 +1998,16 @@
             $('wheel').style.transition = '';
             $('wheel').style.transform = `rotate(${(targetIdx * slice + slice / 2) % 360}deg)`;
 
-            // ✅ Neue Aufgabe setzen
             const newTask = tasks[targetIdx];
-            window.currentPlayer.currentTask = newTask;
-
-            // ✅ Anzeige über dem Rad aktualisieren
-            const taskDisplay = document.getElementById('currentTask');
+            player.currentTask = newTask;
+            const taskDisplay = $('currentTask');
             if (taskDisplay) {
-                taskDisplay.textContent = newTask;
                 taskDisplay.classList.remove('hidden');
-            } else {
-                console.warn("Element #currentTask nicht gefunden!");
+                taskDisplay.style.display = 'block';
+                taskDisplay.textContent = newTask;
+                void taskDisplay.offsetHeight;
             }
-
-            // ✅ Button aktualisieren
             updateActionButton();
-
-            // ✅ Toast zur Kontrolle (optional)
-            showTaskToast([`Neue Aufgabe: ${newTask}`]);
 
             // --- Wenn Mörder-Aufgabe, aber keine Opfer frei: überspringen ---
             if (player.role === "murderer" && newTask.startsWith("Töte eine Person!")) {
@@ -2611,25 +2591,6 @@
                     }, 600);
                 };
             }, 14000);
-        }
-
-        function showTaskToast(tasks) {
-            const toast = document.getElementById('toast');
-            if (!toast) return;
-
-            const taskList = Array.isArray(tasks) ? tasks.join(' | ') : 'Keine Aufgaben gefunden';
-            toast.textContent = taskList;
-
-            toast.classList.remove("hidden", "show");
-            void toast.offsetWidth;
-            toast.classList.add("show");
-
-            setTimeout(() => {
-                toast.classList.remove("show");
-                setTimeout(() => {
-                    toast.classList.add("hidden");
-                }, 600);
-            }, 6000);
         }
 
         function checkConnection() {
