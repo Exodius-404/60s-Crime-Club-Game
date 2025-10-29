@@ -2005,10 +2005,24 @@
             $('wheel').style.transition = '';
             $('wheel').style.transform = `rotate(${(targetIdx * slice + slice / 2) % 360}deg)`;
 
+            // ✅ Neue Aufgabe setzen
             const newTask = tasks[targetIdx];
-            player.currentTask = newTask;
-            $('currentTask').textContent = newTask;
+            window.currentPlayer.currentTask = newTask;
+
+            // ✅ Anzeige über dem Rad aktualisieren
+            const taskDisplay = document.getElementById('currentTask');
+            if (taskDisplay) {
+                taskDisplay.textContent = newTask;
+                taskDisplay.classList.remove('hidden');
+            } else {
+                console.warn("Element #currentTask nicht gefunden!");
+            }
+
+            // ✅ Button aktualisieren
             updateActionButton();
+
+            // ✅ Toast zur Kontrolle (optional)
+            showTaskToast([`Neue Aufgabe: ${newTask}`]);
 
             // --- Wenn Mörder-Aufgabe, aber keine Opfer frei: überspringen ---
             if (player.role === "murderer" && newTask.startsWith("Töte eine Person!")) {
