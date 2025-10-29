@@ -1881,10 +1881,18 @@
 
             const taskDisplay = document.getElementById('currentTask');
             const currentTask = window.currentPlayer?.currentTask;
-            taskDisplay.textContent = currentTask ?? 'Dreh das Rad...';
-            taskDisplay.classList.remove('hidden');
+
+            // 🧪 Debug-Toast zur Kontrolle
+            showTaskToast([`Aktuelle Aufgabe: ${currentTask ?? 'Keine'}`]);
+
+            if (taskDisplay) {
+                taskDisplay.textContent = currentTask ?? 'Dreh das Rad...';
+                taskDisplay.classList.remove('hidden');
+            } else {
+                console.warn("Element #currentTask nicht gefunden!");
+            }
         }
-        ``
+
         // ---------- SPIN + ACTION BUTTON LOGIC ----------
         let spinning = false; // globaler Zustand, ob das Rad gerade dreht
 
@@ -2591,10 +2599,10 @@
             if (!toast) return;
 
             const taskList = Array.isArray(tasks) ? tasks.join(' | ') : 'Keine Aufgaben gefunden';
-            toast.textContent = `Geladene Aufgaben: ${taskList}`;
+            toast.textContent = taskList;
 
             toast.classList.remove("hidden", "show");
-            void toast.offsetWidth; // Reflow für Animation
+            void toast.offsetWidth;
             toast.classList.add("show");
 
             setTimeout(() => {
