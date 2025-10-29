@@ -1892,6 +1892,15 @@
                 // Safari-Fix: DOM-Refresh erzwingen
                 void taskDisplay.offsetHeight;
             }
+
+            setTimeout(() => {
+                const taskDisplay = $('currentTask');
+                if (taskDisplay) {
+                    taskDisplay.innerHTML = '';
+                    taskDisplay.innerText = window.currentPlayer?.currentTask ?? 'Dreh das Rad...';
+                    void taskDisplay.offsetHeight;
+                }
+            }, 100); // Safari braucht manchmal einen kleinen Delay
         }
 
         // ---------- SPIN + ACTION BUTTON LOGIC ----------
