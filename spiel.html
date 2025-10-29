@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Rad des Schicksals</title>
 
     <style>
@@ -24,7 +24,7 @@
             color: var(--accent);
             font-family: Inter, system-ui, sans-serif;
             height: 100vh;
-            overflow-y: auto;
+            overflow-y: hidden;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
@@ -33,6 +33,24 @@
             text-align: center;
             isolation: isolate;
             /* trennt die Z-Ebenen sauber */
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* verhindert Scrollen */
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            touch-action: none;
+            /* verhindert Wischen auf mobilen Geräten */
+
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         #doneList {
@@ -129,34 +147,6 @@
             white-space: nowrap;
             overflow: hidden;
         }
-
-        /* #dotsSpan::after {
-            content: "...";
-            display: inline-block;
-            animation: dotsAnim 1s steps(4, end) infinite;
-        }
-
-        @keyframes dotsAnim {
-            0% {
-                content: "";
-            }
-
-            25% {
-                content: ".";
-            }
-
-            50% {
-                content: "..";
-            }
-
-            75% {
-                content: "...";
-            }
-
-            100% {
-                content: "";
-            }
-        } */
 
         #duBistSpan,
         #dotsSpan,
@@ -1364,17 +1354,33 @@
 
         // window.checkMurderCode = checkMurderCode;
 
-        async function sendClueToDetective(hint) {
-            const detectives = (window.currentScores || []).filter(p => p.role === "detective");
-            if (detectives.length === 0) {
-                showToast("❌ Kein Detektiv verfügbar!");
+        function checkConnection() {
+            if (!navigator.onLine) {
+                showToast("❌ Du bist offline. Bitte stelle eine Internetverbindung her.");
                 return false;
             }
-
-            const randomDetective = detectives[Math.floor(Math.random() * detectives.length)];
-            await setDoc(doc(db, "scores", randomDetective.id), { newHint: hint }, { merge: true });
-            showToast(`✅ Hinweis gesendet! Ein Detektiv wurde informiert.`);
             return true;
+        }
+
+        async function sendClueToDetective(hint) {
+            if (!checkConnection()) return false;
+
+            try {
+                const detectives = (window.currentScores || []).filter(p => p.role === "detective");
+                if (detectives.length === 0) {
+                    showToast("❌ Kein Detektiv verfügbar!");
+                    return false;
+                }
+
+                const randomDetective = detectives[Math.floor(Math.random() * detectives.length)];
+                await setDoc(doc(db, "scores", randomDetective.id), { newHint: hint }, { merge: true });
+                showToast("✅ Hinweis gesendet! Ein Detektiv wurde informiert.");
+                return true;
+            } catch (err) {
+                console.error("Fehler beim Senden des Hinweises:", err);
+                showToast("❌ Fehler beim Senden. Verbindung zur Datenbank fehlgeschlagen.");
+                return false;
+            }
         }
 
         window.sendClueToDetective = sendClueToDetective;
@@ -2542,6 +2548,20 @@
                 };
             }, 14000);
         }
+
+        function checkConnection() {
+            if (!navigator.onLine) {
+                showToast("❌ Keine Internetverbindung!");
+                return false;
+            }
+            return true;
+        }
+
+        setInterval(() => {
+            if (!navigator.onLine) {
+                showToast("⚠️ Du bist offline. Änderungen werden nicht gespeichert.");
+            }
+        }, 5000); // alle 5 Sekunden
 
     </script>
 
