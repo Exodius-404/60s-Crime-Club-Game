@@ -1857,7 +1857,7 @@
             tasks.push(`Töte eine Person!`);
             return tasks;
         }
-        
+
         async function renderWheelForRole(role) {
             let tasks = TASKS[role] ?? [];
             if (role === "murderer") {
@@ -1877,13 +1877,20 @@
             wheel.style.background = grad;
             wheel.dataset.tasks = JSON.stringify(tasks);
 
-            const currentTask = window.currentPlayer?.currentTask;
             const taskDisplay = $('currentTask');
+            const currentPlayer = window.currentPlayer;
+            const currentTask = currentPlayer?.currentTask ?? 'Dreh das Rad...';
+
             if (taskDisplay) {
                 taskDisplay.classList.remove('hidden');
                 taskDisplay.style.display = 'block';
-                taskDisplay.textContent = currentTask || 'Dreh das Rad...';
-                void taskDisplay.offsetHeight; // Safari-Fix
+
+                // Safari-Fix: Inhalt vorher leeren
+                taskDisplay.innerHTML = '';
+                taskDisplay.innerText = currentTask;
+
+                // Safari-Fix: DOM-Refresh erzwingen
+                void taskDisplay.offsetHeight;
             }
         }
 
