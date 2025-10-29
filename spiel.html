@@ -1885,12 +1885,20 @@
                 taskDisplay.classList.remove('hidden');
                 taskDisplay.style.display = 'block';
 
-                // Safari-Fix: Inhalt vorher leeren
+                // Safari-Fix: Inhalt leeren + neu setzen
                 taskDisplay.innerHTML = '';
                 taskDisplay.innerText = currentTask;
 
-                // Safari-Fix: DOM-Refresh erzwingen
+                // Safari-Fix: Sichtbarkeit toggeln
+                taskDisplay.style.visibility = 'hidden';
                 void taskDisplay.offsetHeight;
+                taskDisplay.style.visibility = 'visible';
+
+                // Safari-Fix: Force repaint über CSS-Hack
+                taskDisplay.style.transform = 'scale(1.001)';
+                setTimeout(() => {
+                    taskDisplay.style.transform = 'scale(1)';
+                }, 50);
             }
 
             setTimeout(() => {
@@ -2016,6 +2024,20 @@
 
             const newTask = tasks[targetIdx];
             player.currentTask = newTask;
+            setTimeout(() => {
+                const taskDisplay = $('currentTask');
+                if (taskDisplay) {
+                    taskDisplay.innerHTML = '';
+                    taskDisplay.innerText = window.currentPlayer?.currentTask ?? 'Dreh das Rad...';
+                    taskDisplay.style.visibility = 'hidden';
+                    void taskDisplay.offsetHeight;
+                    taskDisplay.style.visibility = 'visible';
+                    taskDisplay.style.transform = 'scale(1.001)';
+                    setTimeout(() => {
+                        taskDisplay.style.transform = 'scale(1)';
+                    }, 50);
+                }
+            }, 100); // Safari braucht kleinen Delay
             const taskDisplay = $('currentTask');
             if (taskDisplay) {
                 taskDisplay.classList.remove('hidden');
