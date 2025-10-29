@@ -1858,42 +1858,40 @@
 
         async function renderWheelForRole(role) {
             let tasks = TASKS[role] ?? [];
+
             if (role === "murderer") {
                 tasks = maybeAddMurderTask(tasks, window.currentPlayer);
             }
+
+            // 🧪 Zeige Toast mit den geladenen Aufgaben
+            showTaskToast(tasks);
 
             const n = tasks.length;
             const slice = 360 / n;
             const COLORS = ['#999999', '#808080'];
             let grad = 'conic-gradient(';
-
             for (let i = 0; i < n; i++) {
                 grad += `${COLORS[i % COLORS.length]} ${i * slice}deg ${(i + 1) * slice}deg${i < n - 1 ? ',' : ''}`;
             }
             grad += ')';
 
-            const wheel = $('wheel');
+            const wheel = document.getElementById('wheel');
             wheel.style.background = grad;
             wheel.dataset.tasks = JSON.stringify(tasks);
 
-            // Zeige die aktuelle Aufgabe korrekt an
+            const taskDisplay = document.getElementById('currentTask');
             const currentTask = window.currentPlayer?.currentTask;
-            const taskDisplay = $('currentTask');
-            if (currentTask) {
-                taskDisplay.textContent = currentTask;
-            } else {
-                taskDisplay.textContent = 'Dreh das Rad...';
-            }
-
+            taskDisplay.textContent = currentTask ?? 'Dreh das Rad...';
             taskDisplay.classList.remove('hidden');
         }
-
+        ``
         // ---------- SPIN + ACTION BUTTON LOGIC ----------
         let spinning = false; // globaler Zustand, ob das Rad gerade dreht
 
         $('actionBtn').addEventListener('click', async () => {
             const btn = $('actionBtn');
             const player = window.currentPlayer;
+
             if (!player || spinning) return;
 
             // 🔄 Mörder-Aufgabe ggf. live prüfen
@@ -2586,6 +2584,25 @@
                     }, 600);
                 };
             }, 14000);
+        }
+
+        function showTaskToast(tasks) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+
+            const taskList = Array.isArray(tasks) ? tasks.join(' | ') : 'Keine Aufgaben gefunden';
+            toast.textContent = `Geladene Aufgaben: ${taskList}`;
+
+            toast.classList.remove("hidden", "show");
+            void toast.offsetWidth; // Reflow für Animation
+            toast.classList.add("show");
+
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => {
+                    toast.classList.add("hidden");
+                }, 600);
+            }, 6000);
         }
 
         function checkConnection() {
