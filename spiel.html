@@ -969,6 +969,30 @@
         #revealRoleBtn:active {
             opacity: 1;
         }
+
+        #heartContainer {
+            position: fixed;
+            bottom: 5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5em;
+            z-index: 999;
+        }
+
+        .heart {
+            width: 32px;
+            height: 32px;
+            background-image: url('./Bilder/filled-heart.png');
+            /* Pfad zu deinem gefüllten Herz */
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .heart.empty {
+            background-image: url('./Bilder/empty-heart.png');
+            /* Pfad zu deinem leeren Herz */
+        }
     </style>
 </head>
 
@@ -1007,6 +1031,8 @@
         <div id="wheel" class="wheel"></div>
         <button id="actionBtn">Rad drehen</button>
     </div>
+
+    <div id="heartContainer"></div>
 
     <div id="adminPanel" class="hidden">
         <h2>Admin Panel</h2>
@@ -1092,30 +1118,89 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
         import {
-            getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc, query, where, getDocs, getDoc
-        } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+            initializeFirestore,
+            doc, setDoc, collection, onSnapshot, deleteDoc, query, where, getDocs, getDoc
+        } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
+        // Deine neue Firebase-Konfiguration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdfAjs6eibAW0Kzbr_ZKiJDHUAqK6mQM4",
+            authDomain: "crime-club-game-2.firebaseapp.com",
+            projectId: "crime-club-game-2",
+            storageBucket: "crime-club-game-2.firebasestorage.app",
+            messagingSenderId: "179396662143",
+            appId: "1:179396662143:web:004ac2bdd558c12b5a804a",
+            measurementId: "G-TZTSS8JEVK"
+        };
+
+        // Firebase initialisieren
+        const app = initializeApp(firebaseConfig);
+
+        // Firestore mit Long Polling initialisieren (verhindert Listen-Fehler)
+        const db = initializeFirestore(app, {
+            experimentalForceLongPolling: true,
+            useFetchStreams: false
+        });
+
+        // Globale Referenz
+        window.db = db;
         window.setDoc = setDoc;
         window.doc = doc;
 
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCbk0sueA9MKv2ZwBoh9zb9muu8MelFq3g",
-            authDomain: "crime-club-game.firebaseapp.com",
-            projectId: "crime-club-game",
-            storageBucket: "crime-club-game.firebasestorage.app",
-            messagingSenderId: "808280379487",
-            appId: "1:808280379487:web:9107d2b3159d7b86dc4bea",
-            measurementId: "G-TYDNHNYK27"
-        };
+        //  <script type="module">
+        //     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        //     import {
+        //         getFirestore, doc, setDoc, collection, onSnapshot, deleteDoc, query, where, getDocs, getDoc
+        //     } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        window.db = db;
+        //     window.setDoc = setDoc;
+        //     window.doc = doc;
+
+        //     // --- FIREBASE CONFIG ---
+        //     const firebaseConfig = {
+        //         apiKey: "AIzaSyBdfAjs6eibAW0Kzbr_ZKiJDHUAqK6mQM4",
+        //         authDomain: "crime-club-game-2.firebaseapp.com",
+        //         projectId: "crime-club-game-2",
+        //         storageBucket: "crime-club-game-2.firebasestorage.app",
+        //         messagingSenderId: "179396662143",
+        //         appId: "1:179396662143:web:004ac2bdd558c12b5a804a",
+        //         measurementId: "G-TZTSS8JEVK"
+        //     };
+
+        // const app = initializeApp(firebaseConfig);
+        // const db = getFirestore(app);
+        // window.db = db;
 
         // --- Hilfsfunktionen ---
+        // import { getDoc, setDoc, doc } from "firebase/firestore";
+
+        async function checkDailyWriteLimit(maxWrites = 1000) {
+            const ref = doc(window.db, "limits", "dailyUsage");
+            const snap = await getDoc(ref);
+            const today = new Date().toISOString().slice(0, 10);
+
+            if (!snap.exists()) {
+                await setDoc(ref, { date: today, writes: 1 });
+                return true;
+            }
+
+            const data = snap.data();
+            if (data.date !== today) {
+                await setDoc(ref, { date: today, writes: 1 });
+                return true;
+            }
+
+            if (data.writes >= maxWrites) {
+                showToast("❌ Tageslimit erreicht. Schreibvorgänge sind deaktiviert.");
+                return false;
+            }
+
+            await setDoc(ref, { writes: data.writes + 1 }, { merge: true });
+            return true;
+        }
+
         function generateId() {
             return '_' + Math.random().toString(36).slice(2, 11);
         }
@@ -1131,7 +1216,7 @@
                 role: player.role ?? null,
                 completed: player.completed ?? [],
                 blockedUntil: player.blockedUntil ?? 0,
-                murderCode: player.murderCode ?? null
+                hearts: player.hearts ?? 5
             }, { merge: true });
         }
         window.saveScore = saveScore;
@@ -1169,7 +1254,8 @@
                 role: null,
                 score: 0,
                 completed: [],
-                blockedUntil: 0
+                blockedUntil: 0,
+                hearts: 5 // ❤️ Start mit 5 Herzen
             };
             await saveScore(player);
             return player;
@@ -1223,6 +1309,39 @@
         }
         window.updateMurderTask = updateMurderTask;
 
+        /**
+  * ❤️ Blockiert einen Spieler und zieht ein Herz ab
+  * - 1–4 Herzen: blockiert 15 Minuten
+  * - 0 Herzen: dauerhaft blockiert (5 Jahre)
+  */
+        async function blockPlayerWithHeartLoss(playerId, playerName) {
+            const ref = doc(db, "scores", playerId);
+            const snap = await getDoc(ref);
+            const data = snap.data() || {};
+            const currentHearts = typeof data.hearts === "number" ? data.hearts : 5;
+            const newHearts = Math.max(0, currentHearts - 1);
+
+            let blockedUntil;
+
+            if (newHearts <= 0) {
+                // 💔 Dauerhaft blockiert (≈ 5 Jahre)
+                blockedUntil = Date.now() + 5 * 365 * 24 * 60 * 60 * 1000;
+                showToast(`${playerName} hat keine Herzen mehr 💔 und ist jetzt dauerhaft blockiert!`);
+            } else {
+                // ⏱ Nur 15 Minuten blockiert
+                blockedUntil = Date.now() + 15 * 60 * 1000;
+                showToast(`${playerName} wurde blockiert! ❤️-${currentHearts - newHearts}`);
+            }
+
+            await setDoc(ref, { hearts: newHearts, blockedUntil }, { merge: true });
+
+            console.log(`🩸 ${playerName}: ${currentHearts} → ${newHearts} ❤️ (blockedUntil=${blockedUntil})`);
+
+            return { newHearts, blockedUntil };
+        }
+
+        window.blockPlayerWithHeartLoss = blockPlayerWithHeartLoss;
+
         // --- Mörder-Overlay ---
         function openMurderOverlay(victims, murderer) {
             const overlay = document.getElementById("murderOverlay");
@@ -1239,14 +1358,13 @@
 
                     if (!isBlocked) {
                         btn.onclick = async () => {
-                            const unblockTime = Date.now() + 15 * 60 * 1000;
-                            await setDoc(doc(db, "scores", v.id), {
-                                blockedUntil: unblockTime
-                            }, { merge: true });
 
+                            // ❤️ Herz-Logik über gemeinsame Funktion
+                            await blockPlayerWithHeartLoss(v.id, v.name);
+
+                            // Erledigte Aufgabe speichern
                             await addCompleted(`Person getötet: ${v.name}`);
 
-                            showToast(`${v.name} wurde getötet! ⏱ 15 Minuten blockiert`);
                             murderer.currentTask = null;
                             $('currentTask').textContent = "Dreh das Rad...";
                             $('actionBtn').textContent = "Rad drehen";
@@ -1270,51 +1388,50 @@
         function openDetectiveOverlay(players, detective) {
             const overlay = document.getElementById("detectiveOverlay");
             const listEl = document.getElementById("detectivePlayerList");
-            const taskEl = document.getElementById("currentTask"); // Stelle sicher, dass dieses Element existiert
+            const taskEl = document.getElementById("currentTask");
             listEl.innerHTML = "";
 
-            let hasFreePlayers = false;
-
-            players.forEach(player => {
-                if (player.id === detective.id) return;
-                if (player.role === "detective") return;
-
-                const isBlocked = player.blockedUntil && Date.now() < player.blockedUntil;
-                if (!isBlocked) hasFreePlayers = true;
+            players.forEach(async player => {
+                if (player.id === detective.id) return;       // sich selbst ausschließen
+                if (player.role === "detective") return;      // keine anderen Detektive
 
                 const btn = document.createElement("button");
-                btn.textContent = isBlocked ? `${player.name} ⏱ gesperrt` : player.name;
-                btn.disabled = isBlocked;
+                const isBlocked = player.blockedUntil && player.blockedUntil > Date.now();
 
-                btn.onclick = async () => {
-                    const unblockTime = Date.now() + BLOCK_DURATION;
-                    await setDoc(doc(db, "scores", player.id), {
-                        blockedUntil: unblockTime
-                    }, { merge: true });
+                // Button-Text und Zustand
+                if (isBlocked) {
+                    btn.textContent = `${player.name} 🔒 blockiert`;
+                    btn.disabled = true;
+                } else {
+                    btn.textContent = player.name;
+                    btn.disabled = false;
 
-                    await addCompleted(`Person gesperrt: ${player.name}`);
+                    btn.onclick = async () => {
+                        // ❤️ Herz verlieren & blockieren
+                        const { newHearts } = await blockPlayerWithHeartLoss(player.id, player.name);
 
-                    showToast(`${player.name} wurde für 15 Minuten gesperrt! 🕵️‍♂️`);
-                    detective.currentTask = null;
-                    taskEl.textContent = "Dreh das Rad...";
-                    $('actionBtn').textContent = "Rad drehen";
-                    closeDetectiveOverlay();
-                };
+                        if (newHearts <= 0) {
+                            btn.textContent = `${player.name} 💔 dauerhaft blockiert`;
+                        } else {
+                            btn.textContent = `${player.name} ⏱ blockiert (${newHearts}❤️ übrig)`;
+                        }
+                        btn.disabled = true;
+
+                        // Aufgabe abschließen
+                        detective.currentTask = null;
+                        taskEl.textContent = "Dreh das Rad...";
+                        $('actionBtn').textContent = "Rad drehen";
+                        closeDetectiveOverlay();
+                    };
+
+                }
 
                 listEl.appendChild(btn);
             });
 
-            // Aufgabe ausblenden, wenn keine freien Spieler
-            if (!hasFreePlayers) {
-                taskEl.textContent = "Dreh das Rad...";
-                $('actionBtn').textContent = "Rad drehen";
-            } else {
-                taskEl.textContent = "Das ist deine Chance den Mörder auszuschalten!";
-                $('actionBtn').textContent = "Verdächtigen";
-            }
-
             overlay.classList.remove("hidden");
         }
+
 
         function closeDetectiveOverlay() {
             document.getElementById("detectiveOverlay").classList.add("hidden");
@@ -1415,13 +1532,65 @@
 
             if (window.currentPlayer?.id) {
                 const me = arr.find(p => p.id === window.currentPlayer.id || p.name === window.currentPlayer.name);
+                let blockCountdownInterval;
+
                 if (me) {
                     window.currentPlayer = me;
-                    if (typeof window.startBlockCountdown === "function") {
-                        try { window.startBlockCountdown(); } catch (e) { }
+                    renderHearts(me.hearts ?? 5);
+
+                    const actionBtn = document.getElementById('actionBtn');
+                    const now = Date.now();
+                    const remainingMs = me.blockedUntil - now;
+
+                    // ⛔ Countdown stoppen, falls bereits einer läuft
+                    if (blockCountdownInterval) {
+                        clearInterval(blockCountdownInterval);
+                        blockCountdownInterval = null;
+                    }
+
+                    if (remainingMs > 15 * 60 * 1000) {
+                        actionBtn.disabled = true;
+                        actionBtn.textContent = "Game Over 💀";
+                    } else if (remainingMs > 0) {
+                        let remainingSec = Math.floor(remainingMs / 1000);
+                        actionBtn.disabled = true;
+
+                        const updateText = () => {
+                            const minutes = Math.floor(remainingSec / 60);
+                            const seconds = remainingSec % 60;
+                            actionBtn.textContent = `Blockiert (${minutes}:${seconds.toString().padStart(2, "0")})`;
+                        };
+
+                        updateText(); // Initial anzeigen
+
+                        blockCountdownInterval = setInterval(() => {
+                            remainingSec--;
+
+                            // ⛔ Sofort stoppen, wenn Datenbank zwischenzeitlich freigibt
+                            if (window.currentPlayer?.blockedUntil === 0) {
+                                clearInterval(blockCountdownInterval);
+                                blockCountdownInterval = null;
+                                actionBtn.disabled = false;
+                                actionBtn.textContent = "Rad drehen";
+                                return;
+                            }
+
+                            if (remainingSec <= 0) {
+                                clearInterval(blockCountdownInterval);
+                                blockCountdownInterval = null;
+                                actionBtn.disabled = false;
+                                actionBtn.textContent = "Rad drehen";
+                            } else {
+                                updateText();
+                            }
+                        }, 1000);
+                    } else {
+                        actionBtn.disabled = false;
+                        actionBtn.textContent = "Rad drehen";
                     }
                 }
             }
+
 
             // --- Prüfen, ob der aktuelle Spieler ein Detektiv ist und neuen Hinweis hat ---
             if (window.currentPlayer?.role === "detective") {
@@ -1663,9 +1832,18 @@
             startBlockCountdown();
         });
 
+        let heartRenderTimeout;
+        function safeRenderHearts(count) {
+            renderHearts(count); // Direkt anzeigen statt mit Timeout
+        }
+        window.safeRenderHearts = safeRenderHearts;
+
         /* ---------- ANIMATION & INTRO ---------- */
         // bleibt unverändert
         function animateIntro(player) {
+            window.currentPlayer = player;
+            renderHearts(player.hearts ?? 5); // ← direkt nach dem Login
+
             const startArea = $('startArea');
             const nameInput = $('nameInput');
             const roleArea = $('roleArea');
@@ -2244,44 +2422,72 @@
             }
         };
 
+        function renderHearts(heartCount = 5) {
+            const container = $('heartContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 5; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                if (i >= heartCount) heart.classList.add('empty'); // leeres Herz
+                container.appendChild(heart);
+            }
+        }
+        window.renderHearts = renderHearts;
+
+
         /* ---------- BLOCK / COUNTDOWN ---------- */
         const BLOCK_DURATION = 15 * 60 * 1000;
         let blockCountdownInterval = null;
 
-        function startBlockCountdown() {
-            const actionBtn = $('actionBtn');
+        async function startBlockCountdown() {
+            const actionBtn = document.getElementById('actionBtn');
             const player = window.currentPlayer;
             if (!player || !actionBtn) return;
 
-            // Vorherigen Countdown stoppen
-            if (blockCountdownInterval) {
-                clearInterval(blockCountdownInterval);
-                blockCountdownInterval = null;
+            const hearts = player.hearts ?? 0;
+            const now = Date.now();
+            const blockUntil = player.blockedUntil ?? 0;
+            const remainingMs = blockUntil - now;
+
+            if (remainingMs > 15 * 60 * 1000) {
+                renderHearts(hearts);
+                actionBtn.disabled = true;
+                actionBtn.textContent = "Game Over 💀";
+                return;
             }
 
-            const updateCountdown = () => {
-                const remaining = player.blockedUntil - Date.now();
-                if (remaining <= 0) {
-                    actionBtn.disabled = false;
-                    actionBtn.textContent = "Rad drehen";
-                    player.blockedUntil = 0;
-                    clearInterval(blockCountdownInterval);
-                    blockCountdownInterval = null;
-                } else {
-                    const minutes = Math.floor(remaining / 60000);
-                    const seconds = Math.floor((remaining % 60000) / 1000);
-                    actionBtn.textContent = `Blockiert: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    actionBtn.disabled = true;
-                }
-            };
+            if (remainingMs > 0) {
+                let remainingSec = Math.floor(remainingMs / 1000);
+                actionBtn.disabled = true;
+                renderHearts(hearts);
 
-            if (player.blockedUntil && Date.now() < player.blockedUntil) {
-                updateCountdown();
-                blockCountdownInterval = setInterval(updateCountdown, 1000);
-            } else {
-                actionBtn.disabled = false;
-                actionBtn.textContent = "Rad drehen";
+                const updateText = () => {
+                    const minutes = Math.floor(remainingSec / 60);
+                    const seconds = remainingSec % 60;
+                    actionBtn.textContent = `Blockiert (${minutes}:${seconds.toString().padStart(2, "0")})`;
+                };
+
+                updateText();
+                const interval = setInterval(async () => {
+                    remainingSec -= 1;
+                    if (remainingSec <= 0) {
+                        clearInterval(interval);
+                        await setDoc(doc(db, "scores", player.id), { blockedUntil: 0 }, { merge: true });
+                        actionBtn.disabled = false;
+                        actionBtn.textContent = "Rad drehen";
+                        showToast("Du bist wieder frei! 🔓");
+                        renderHearts(player.hearts ?? 5);
+                    } else {
+                        updateText();
+                    }
+                }, 1000);
+                return;
             }
+
+            actionBtn.disabled = false;
+            actionBtn.textContent = "Rad drehen";
+            renderHearts(hearts);
         }
 
         /* ---------- COMPLETED / SCORE ---------- */
@@ -2443,7 +2649,21 @@
                 ? "🔓 Spieler wurde freigegeben!"
                 : "⏸ Spieler wurde für 15 Minuten blockiert.");
 
-            renderAdminScoreboard(); // UI aktualisieren
+            renderAdminScoreboard();
+
+            // Countdown nur für den aktuellen Spieler starten
+            if (window.currentPlayer?.id === id) {
+                startBlockCountdown(); // Countdown starten oder beenden
+            }
+
+            const player = window.currentScores.find(p => p.id === id);
+            const hearts = player?.hearts ?? 5;
+
+            await setDoc(doc(db, "scores", id), {
+                blockedUntil: newBlockedUntil,
+                manualPause: !isPaused,
+                hearts // ❤️ wieder mitspeichern!
+            }, { merge: true });
         }
         window.togglePause = togglePause;
 
