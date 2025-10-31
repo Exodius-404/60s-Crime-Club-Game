@@ -1536,7 +1536,9 @@
 
                 if (me) {
                     window.currentPlayer = me;
-                    renderHearts(me.hearts ?? 5);
+                    if (window.showHeartsAfterIntro) {
+                        renderHearts(me.hearts ?? 5);
+                    }
 
                     const actionBtn = document.getElementById('actionBtn');
                     const now = Date.now();
@@ -1763,7 +1765,7 @@
         --------------------------- */
         const $ = id => document.getElementById(id);
         window.$ = $;
-
+        window.showHeartsAfterIntro = false;
 
         const CONFIG = { murdererProb: 0.25, detectiveProb: 0.25 };
 
@@ -1838,7 +1840,9 @@
 
         let heartRenderTimeout;
         function safeRenderHearts(count) {
-            renderHearts(count); // Direkt anzeigen statt mit Timeout
+            if (window.showHeartsAfterIntro) {
+                renderHearts(count); // Direkt anzeigen statt mit Timeout
+            }
         }
         window.safeRenderHearts = safeRenderHearts;
 
@@ -1846,7 +1850,16 @@
         // bleibt unverändert
         function animateIntro(player) {
             window.currentPlayer = player;
-            renderHearts(player.hearts ?? 5); // ← direkt nach dem Login
+
+            setTimeout(() => {
+                window.showHeartsAfterIntro = true;
+                renderHearts(player.hearts ?? 5);
+                document.getElementById('heartContainer').style.display = 'flex';
+            }, 14000);
+
+            if (window.showHeartsAfterIntro) {
+                renderHearts(player.hearts ?? 5); // ❤️ Anzeige nach 14 Sekunden
+            }
 
             const startArea = $('startArea');
             const nameInput = $('nameInput');
@@ -2455,7 +2468,9 @@
             const remainingMs = blockUntil - now;
 
             if (remainingMs > 15 * 60 * 1000) {
-                renderHearts(hearts);
+                if (window.showHeartsAfterIntro) {
+                    renderHearts(hearts);
+                }
                 actionBtn.disabled = true;
                 actionBtn.textContent = "Game Over 💀";
                 return;
@@ -2464,7 +2479,9 @@
             if (remainingMs > 0) {
                 let remainingSec = Math.floor(remainingMs / 1000);
                 actionBtn.disabled = true;
-                renderHearts(hearts);
+                if (window.showHeartsAfterIntro) {
+                    renderHearts(hearts);
+                }
 
                 const updateText = () => {
                     const minutes = Math.floor(remainingSec / 60);
@@ -2481,7 +2498,9 @@
                         actionBtn.disabled = false;
                         actionBtn.textContent = "Rad drehen";
                         showToast("Du bist wieder frei! 🔓");
-                        renderHearts(player.hearts ?? 5);
+                        if (window.showHeartsAfterIntro) {
+                            renderHearts(player.hearts ?? 5);
+                        }
                     } else {
                         updateText();
                     }
@@ -2491,7 +2510,9 @@
 
             actionBtn.disabled = false;
             actionBtn.textContent = "Rad drehen";
-            renderHearts(hearts);
+            if (window.showHeartsAfterIntro) {
+                renderHearts(hearts);
+            }
         }
 
         /* ---------- COMPLETED / SCORE ---------- */
