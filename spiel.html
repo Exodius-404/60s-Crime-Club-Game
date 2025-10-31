@@ -1563,7 +1563,7 @@
 
                         updateText(); // Initial anzeigen
 
-                        blockCountdownInterval = setInterval(() => {
+                        blockCountdownInterval = setInterval(async () => {
                             remainingSec--;
 
                             // ⛔ Sofort stoppen, wenn Datenbank zwischenzeitlich freigibt
@@ -1578,6 +1578,10 @@
                             if (remainingSec <= 0) {
                                 clearInterval(blockCountdownInterval);
                                 blockCountdownInterval = null;
+
+                                // ✅ Jetzt erlaubt: await im async Callback
+                                await setDoc(doc(db, "scores", me.id), { blockedUntil: 0 }, { merge: true });
+
                                 actionBtn.disabled = false;
                                 actionBtn.textContent = "Rad drehen";
                             } else {
